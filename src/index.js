@@ -7,10 +7,10 @@ function generatePoints({start, end}) {
         x1: start[0],
         y1: start[1],
         CONTROL: 'C',
-        cpx1: parseInt(start[0] + end[0])/2 + 50,
-        cpy1: start[1] + 50,
-        cpx2: parseInt(start[0] + end[0])/2 - 50,
-        cpy2: end[1] -50,
+        cpx1: parseInt(start[0] + end[0])/2,
+        cpy1: start[1],
+        cpx2: parseInt(start[0] + end[0])/2,
+        cpy2: end[1],
         x2: end[0],
         y2: end[1],
     }
@@ -22,10 +22,11 @@ class TChart {
         this.chart = SVG().addTo(target).size('100%', '100%');
         // const rect = new Rect({width: 100, height: 100}).fill('#369');
         // rect.addTo(this.chart)
-        this.chart.linesG   = this.chart.group().attr('class', 'lines');
-        this.chart.modulesG = this.chart.group().attr('class', 'modules');
-        this.chart.resultLinesG = this.chart.group().attr('class', 'resultLines');
-        this.chart.resultsG = this.chart.group().attr('class', 'results');
+        this.container = this.chart.group().attr('class', 'tetris-chart-container');
+        this.chart.linesG   = this.container.group().attr('class', 'tetris-chart-lines');
+        this.chart.modulesG = this.container.group().attr('class', 'tetris-chart-modules');
+        this.chart.resultLinesG = this.container.group().attr('class', 'tetris-chart-resultLines');
+        this.chart.resultsG = this.container.group().attr('class', 'tetris-chart-results');
         this.data = data;
         this.lines = [];
         this.modules = [];
