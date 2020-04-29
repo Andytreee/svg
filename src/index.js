@@ -33,7 +33,8 @@ class TChart {
             f: 0,
         };
         this.init(data)
-        this.zoom()
+        this.zoom();
+        this.translate();
     }
 
     init({lines, modules, results = 0, resultLines}) {
@@ -137,6 +138,45 @@ class TChart {
 
     translate() {
 
+        // 记录拖拽相关位置信息
+        const dragInfo = {
+            draggable: false,
+            originX: 0,
+            originY: 0,
+            moveX: 0,
+            moveY: 0,
+        };
+        this.container.on('translate', e=> {
+            this.container
+                .transform(this.matrix)
+        })
+        this.chart
+            .mousedown( e=> {
+                dragInfo.draggable = true;
+                dragInfo.originX = e.offsetX;
+                dragInfo.originY = e.offsetY;
+                this.chart
+                    .mousemove(null)
+                    .mouseup(null)
+                    .mousemove(e => {
+                        if(dragInfo.draggable) {
+                            const x = e.offsetX - dragInfo.originX;
+                            const y = e.offsetY - dragInfo.originY;
+                            requestAnimationFrame(() =>{
+                                group.transform({
+                                    a: 1, b: 0, c: 0, d: 1, e: x , f: y,
+                                });
+                            });
+                            this.matrix.e = x;
+                            this.matrix.f = y;
+                            this.container.fire('translate')
+                        }
+                    })
+                    .mouseup(function (e) {
+                        dragInfo.draggable = false;
+                    })
+
+            })
     }
 }
 

@@ -121,6 +121,7 @@ export default class Module{
     }
 
     handleMove(e, module, group, dragInfo) {
+        e.stopPropagation();
         dragInfo.draggable = true;
         dragInfo.clickX = e.offsetX - dragInfo.originX;
         dragInfo.clickY = e.offsetY - dragInfo.originY;
@@ -129,8 +130,8 @@ export default class Module{
             .mouseup(null)
             .mousemove(e => {
                 if(dragInfo.draggable) {
-                    const x = e.clientX - dragInfo.clickX;
-                    const y = e.clientY - dragInfo.clickY;
+                    const x = e.offsetX - dragInfo.clickX;
+                    const y = e.offsetY - dragInfo.clickY;
                     requestAnimationFrame(() =>{
                         group.transform({
                             a: 1, b: 0, c: 0, d: 1, e: x , f: y,
