@@ -13,10 +13,11 @@ class TChart {
         // const rect = new Rect({width: 100, height: 100}).fill('#369');
         // rect.addTo(this.chart)
         this.container = this.chart.group().addClass( 'tetris-chart-container');
-        this.chart.linesG   = this.container.group().addClass('tetris-chart-lines');
-        this.chart.modulesG = this.container.group().addClass('tetris-chart-modules');
-        this.chart.resultLinesG = this.container.group().addClass('tetris-chart-resultLines');
-        this.chart.resultsG = this.container.group().addClass('tetris-chart-results');
+        this.modulesG = this.container.group().addClass('tetris-chart-modules');
+        this.linesG  = this.container.group().addClass('tetris-chart-lines');
+        this.resultLinesG = this.container.group().addClass('tetris-chart-resultLines');
+        this.resultsG = this.container.group().addClass('tetris-chart-results');
+        this.tempLineG = this.container.group();
         this.data = data;
         this.lines = [];
         this.modules = [];
@@ -30,7 +31,7 @@ class TChart {
             this.lines.push({
                 id: line.id,
                 data: line,
-                target: this.chart.linesG
+                target: this.linesG
                     .path(generatePoints(line))
                     .stroke({
                         color: '#333',
@@ -53,7 +54,7 @@ class TChart {
             this.resultLines.push({
                 id: line.id,
                 data: line,
-                target: this.chart.resultLinesG
+                target: this.resultLinesG
                     .path(generatePoints(line))
                     .stroke({
                         color: '#333',
@@ -68,7 +69,7 @@ class TChart {
         for(let i = 0; i<= results; i++) {
             this.results.push({
                 id: 0,
-                target: this.chart.resultsG
+                target: this.resultsG
                     .circle(20)
                     .move(1780, (i + 1) * 50 - 10)
                     .attr({
@@ -80,7 +81,6 @@ class TChart {
 
             })
         }
-
         this.drawModules(modules)
     }
 
@@ -90,8 +90,8 @@ class TChart {
 
     drawModules(modules) {
         modules.map( module => {
-            const group = new Module(module, this.chart, this.lines, this.resultLines);
-            group.addTo(this.chart.modulesG);
+            const group = new Module(module, this.chart, this.lines, this.resultLines, this.tempLineG);
+            group.addTo(this.modulesG);
             this.resultLines.push({
                 id: module.id,
                 data: module,
@@ -102,6 +102,12 @@ class TChart {
 
     move() {
 
+    }
+
+    zoom() {
+        this.container.on('', e=> {
+
+        })
     }
 }
 

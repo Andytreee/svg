@@ -7,6 +7,13 @@
  * @LastEditTime: 2020/4/28 16:04
  */
 // 模块宽度  高度
+import module from './module.png';
+import initial from './status/initial.png';
+import running from './status/running.png';
+import failure from './status/failure.png';
+import success from './status/success.png';
+
+
 export const width  = 100;
 export const height = 86;
 export const textH  = 24;
@@ -16,14 +23,14 @@ export const modulesKV = {
         inputNum: 0,
         outputNum: 1,
         text: '数据表',
-
+        img: module,
         url: 'DataTable'
     },
     '12': {
         inputNum: 0,
         outputNum: 1,
         text: '静态文件接入',
-
+        img: module,
         url: 'StaticFile'
     },
     // 预处理
@@ -31,56 +38,56 @@ export const modulesKV = {
         inputNum: 2,
         outputNum: 1,
         text: 'Join',
-
+        img: module,
         url: 'Join'
     },
     '22': {
         inputNum: 2,
         outputNum: 1,
         text: 'Append',
-
+        img: module,
         url: 'Append'
     },
     '31': {
         inputNum: 1,
         outputNum: 2,
         text: '数据集切分',
-
+        img: module,
         url: 'DatasetSlicing'
     },
     '35': {
         inputNum: 1,
         outputNum: 1,
         text: '特征缩放',
-
+        img: module,
         url: 'FeatureScaling'
     },
     '38': {
         inputNum: 1,
         outputNum: 1,
         text: '样本采样',
-
+        img: module,
         url: 'Sampling'
     },
     '32': {
         inputNum: 1,
         outputNum: 1,
         text: '缺失值处理',
-
+        img: module,
         url: 'MissingValue'
     },
     '36': {
         inputNum: 1,
         outputNum: 1,
         text: '异常点处理',
-
+        img: module,
         url: 'AnomalyAnalysis'
     },
     '33': {
         inputNum: 1,
         outputNum: 1,
         text: '选择指定列',
-
+        img: module,
         url: 'DeleteColumn'
     },
     // 数据探索
@@ -88,7 +95,7 @@ export const modulesKV = {
         inputNum: 1,
         outputNum: 0,
         text: '多变量描述性分析',
-
+        img: module,
         url: 'MultiVariable'
     },
 
@@ -97,35 +104,35 @@ export const modulesKV = {
         inputNum: 1,
         outputNum: 1,
         text: '分箱',
-
+        img: module,
         url: 'Binning'
     },
     '37': {
         inputNum: 1,
         outputNum: 1,
         text: '特征编码',
-
+        img: module,
         url: 'FeatureCoding'
     },
     '34': {
         inputNum: 1,
         outputNum: 1,
         text: '降维',
-
+        img: module,
         url: 'DimensionalityReduction'
     },
     '302': {
         inputNum: 1,
         outputNum: 1,
         text: '尺度变换',
-
+        img: module,
         url: 'ScaleChanging'
     },
     '39': {
         inputNum: 1,
         outputNum: 1,
         text: '特征组合',
-
+        img: module,
         url: 'FeatureCombination'
     },
     // 机器学习
@@ -133,56 +140,56 @@ export const modulesKV = {
         inputNum: 1,
         outputNum: 2,
         text: 'Mean-Shift',
-
+        img: module,
         url: 'MeanShift'
     },
     '405': {
         inputNum: 1,
         outputNum: 1,
         text: '时间序列',
-
+        img: module,
         url: 'TimeSeries'
     },
     '41': {
         inputNum: 2,
         outputNum: 2,
         text: '逻辑回归',
-
+        img: module,
         url: 'LogisticRegression'
     },
     '42': {
         inputNum: 2,
         outputNum: 2,
         text: '线性回归',
-
+        img: module,
         url: 'LinearRegression'
     },
     '44': {
         inputNum: 2,
         outputNum: 2,
         text: 'KNN-Classifier',
-
+        img: module,
         url: 'KNNClassifier'
     },
     '404': {
         inputNum: 2,
         outputNum: 2,
         text: 'KNN-Regression',
-
+        img: module,
         url: 'KNNRegression'
     },
     '46': {
         inputNum: 2,
         outputNum: 2,
         text: 'GBDT-Classifier',
-
+        img: module,
         url: 'GBDTClassifier'
     },
     '403': {
         inputNum: 2,
         outputNum: 2,
         text: 'GBDT-Regression',
-
+        img: module,
         url: 'GBDTRegression'
     },
 
@@ -190,56 +197,56 @@ export const modulesKV = {
         inputNum: 2,
         outputNum: 2,
         text: 'XGBOOST-Classifier',
-
+        img: module,
         url: 'XGBOOSTClassifier'
     },
     '49': {
         inputNum: 2,
         outputNum: 2,
         text: 'XGBOOST-Regression',
-
+        img: module,
         url: 'XGBOOSTRegression'
     },
     '401': {
         inputNum: 2,
         outputNum: 2,
         text: 'DecisionTree-Classifier',
-
+        img: module,
         url: 'DecisionTreeClassifier'
     },
     '402': {
         inputNum: 2,
         outputNum: 2,
         text: 'DecisionTree-Regression',
-
+        img: module,
         url: 'DecisionTreeRegression'
     },
     '43': {
         inputNum: 2,
         outputNum: 2,
         text: '神经网络',
-
+        img: module,
         url: 'neuralNet'
     },
     '51': {
         inputNum: 1,
         outputNum: 2,
         text: 'Kmeans',
-
+        img: module,
         url: 'kmeans'
     },
     '45': {
         inputNum: 2,
         outputNum: 2,
         text: 'SVM-SVC',
-
+        img: module,
         url: 'SVMSVC'
     },
     '47': {
         inputNum: 2,
         outputNum: 2,
         text: 'SVM-SVR',
-
+        img: module,
         url: 'SVMSVR'
     },
     // 模型评价
@@ -247,14 +254,14 @@ export const modulesKV = {
         inputNum: 2,
         outputNum: 0,
         text: '模型评估',
-
+        img: module,
         url: 'ModelEvaluation'
     },
     '74': {
         inputNum: 3,
         outputNum: 0,
         text: '模型对比',
-
+        img: module,
         url: 'ModelCompare'
     },
     // notenook
@@ -262,12 +269,19 @@ export const modulesKV = {
         inputNum: 5,
         outputNum: 5,
         text: 'Notebook',
-
+        img: module,
         url: 'Notebook'
     },
 
 
 };
+export const status = {
+    '-1': initial,
+    0: initial,
+    1: running,
+    2: success,
+    3: failure,
+}
 export const modulesIndexKey = {
     // 数据源
     DataTable: 11,
