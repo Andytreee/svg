@@ -23,7 +23,17 @@ class TChart {
         this.modules = [];
         this.results = [];
         this.resultLines = [];
+        // container 初始缩放 位置参数
+        this.matrix = {
+            a: 1,
+            b: 0,
+            c: 0,
+            d: 1,
+            e: 0 ,
+            f: 0,
+        };
         this.init(data)
+        this.zoom()
     }
 
     init({lines, modules, results = 0, resultLines}) {
@@ -105,9 +115,28 @@ class TChart {
     }
 
     zoom() {
-        this.container.on('', e=> {
+        this.container.on('zoom', e=> {
+            this.container
+                .transform(this.matrix)
+        })
+        document.querySelector('#app').addEventListener('wheel', e=> {
+            e.preventDefault();
+            if(e.deltaY > 0 && this.matrix.a < 2) {
+                this.matrix.a += 0.2;
+                this.matrix.d += 0.2;
+                this.container.fire('zoom')
+            }
+            if(e.deltaY < 0 && this.matrix.a > 0.6) {
+                this.matrix.a -= 0.2;
+                this.matrix.d -= 0.2;
+                this.container.fire('zoom')
+            }
 
         })
+    }
+
+    translate() {
+
     }
 }
 
