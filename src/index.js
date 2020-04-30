@@ -101,7 +101,7 @@ class TChart {
 
     drawModules(modules) {
         modules.map( module => {
-            const group = new Module(module, this.chart, this.lines, this.resultLines, this.tempLineG);
+            const group = new Module(module, this.chart, this.container, this.lines, this.resultLines, this.tempLineG, this.matrix);
             group.addTo(this.modulesG);
             this.resultLines.push({
                 id: module.id,
@@ -143,15 +143,16 @@ class TChart {
             draggable: false,
             originX: 0,
             originY: 0,
-            moveX: 0,
-            moveY: 0,
+            offsetX: 0,
+            offsetY: 0,
         };
         this.container.on('translate', e=> {
             this.container
                 .transform(this.matrix)
         })
         this.chart
-            .mousedown( e=> {
+            .css('cursor', 'grab')
+            .mousedown( e => {
                 dragInfo.draggable = true;
                 dragInfo.originX = e.offsetX;
                 dragInfo.originY = e.offsetY;
@@ -162,20 +163,16 @@ class TChart {
                         if(dragInfo.draggable) {
                             const x = e.offsetX - dragInfo.originX;
                             const y = e.offsetY - dragInfo.originY;
-                            requestAnimationFrame(() =>{
-                                group.transform({
-                                    a: 1, b: 0, c: 0, d: 1, e: x , f: y,
-                                });
-                            });
-                            this.matrix.e = x;
-                            this.matrix.f = y;
-                            this.container.fire('translate')
+                            this.matrix.e = x + dragInfo.offsetX;
+                            this.matrix.f = y + dragInfo.offsetY;
+                            this.container.fire('translate');
                         }
                     })
-                    .mouseup(function (e) {
+                    .mouseup( e => {
                         dragInfo.draggable = false;
+                        dragInfo.offsetX = this.matrix.e;
+                        dragInfo.offsetY = this.matrix.f;
                     })
-
             })
     }
 }

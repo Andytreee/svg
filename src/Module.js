@@ -10,11 +10,13 @@ import {
 } from "./tool";
 
 export default class Module{
-    constructor(module,  chart, lines, resultLines, tempLineG) {
+    constructor(module,  chart, container, lines, resultLines, tempLineG, matrix) {
         this.lines = lines;
         this.chart = chart;
         this.resultLines = resultLines;
         this.tempLineG = tempLineG;
+        this.matrix = matrix;
+        this.container = container;
         return this.draw(module)
     }
     drawNode() {
@@ -28,20 +30,17 @@ export default class Module{
             .transform({
                 a: 1, b: 0, c: 0, d: 1, e: module.x , f: module.y,
             })
-            .mousedown(() => {
+            .mousedown(e => {
                 // 点击时将当前模块置于最前
                 group.front();
+                // 阻止事件传递到container产生拖拽
+                e.stopPropagation();
             });
 
         // 记录拖拽相关位置信息
         const dragInfo = {
             draggable: false,
-            originX: module.x,
-            originY: module.y,
-            clickX: 0,
-            clickY: 0,
         };
-
         // 绘制模块框体并定义拖拽事件
         group
             .rect(100, 86)
@@ -121,17 +120,20 @@ export default class Module{
     }
 
     handleMove(e, module, group, dragInfo) {
-        e.stopPropagation();
         dragInfo.draggable = true;
-        dragInfo.clickX = e.offsetX - dragInfo.originX;
-        dragInfo.clickY = e.offsetY - dragInfo.originY;
+        const { translateX, translateY } = group.transform();
+        dragInfo.clickX = e.offsetX / this.matrix.a - translateX;
+        dragInfo.clickY = e.offsetY / this.matrix.a - translateY ;
         this.chart
             .mousemove(null)
             .mouseup(null)
             .mousemove(e => {
                 if(dragInfo.draggable) {
-                    const x = e.offsetX - dragInfo.clickX;
-                    const y = e.offsetY - dragInfo.clickY;
+                    // const x = e.offsetX - dragInfo.clickX ;
+                    // const y = e.offsetY - dragInfo.clickY ;
+                    const x = e.offsetX / this.matrix.a - dragInfo.clickX;
+                    const y = e.offsetY / this.matrix.a - dragInfo.clickY;
+                    console.log(e.offsetX, e.offsetY)
                     requestAnimationFrame(() =>{
                         group.transform({
                             a: 1, b: 0, c: 0, d: 1, e: x , f: y,
@@ -181,14 +183,10 @@ export default class Module{
                             })
                         }
                     });
-                    dragInfo.originX = x;
-                    dragInfo.originY = y;
                 }
             })
-            .mouseup(function (e) {
+            .mouseup( e => {
                 dragInfo.draggable = false;
-                dragInfo.originX = e.offsetX - dragInfo.clickX;
-                dragInfo.originY = e.offsetY - dragInfo.clickY;
             })
     }
 
