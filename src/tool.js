@@ -401,7 +401,7 @@ export function transformData({ nodes, edges }) {
                 if(!node.out[startNodeIndex]) node.out[startNodeIndex] = [];
                 node.out[startNodeIndex].push({ id: lineID, type: 'result'});
             }
-        })
+        });
         return node;
     });
     return { modules: nodes, lines: edges, resultLines, results}
@@ -437,7 +437,7 @@ export function generateResultsAndResultLines(nodes) {
                 startNodeIndex: nodeIndex,
                 endNodeId: 'result',
                 endNodeIndex: resultIndex,
-            })
+            });
             if(resultIndex > maxResultIndex) maxResultIndex = resultIndex;
         }
     }

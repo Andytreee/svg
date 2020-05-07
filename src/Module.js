@@ -10,13 +10,14 @@ import {
 } from "./tool";
 
 export default class Module{
-    constructor(module,  chart, container, lines, resultLines, tempLineG, matrix) {
+    constructor(module, chart, container, lines, resultLines, tempLineG, matrix, addModuleInfo) {
         this.lines = lines;
         this.chart = chart;
         this.resultLines = resultLines;
         this.tempLineG = tempLineG;
         this.matrix = matrix;
         this.container = container;
+        this.addModuleInfo = addModuleInfo;
         return this.draw(module)
     }
     drawNode() {
@@ -52,13 +53,17 @@ export default class Module{
                 lineWidth: 2
             })
             .mousedown(e =>{
-               this.handleMove( e, module, group, dragInfo)
-            })
+                this.handleMove( e, module, group, dragInfo)
+            });
 
         // 绘制模块小圆点
         const r  = 10;
         for(let i=0; i<module.inNum; i++) {
             const span = height / (module.inNum + 1);
+            const position = {
+                x: -r/2,
+                y: (i + 1) * span - r/2
+            };
             group
                 .circle(r)
                 .css('cursor', 'pointer')
@@ -67,11 +72,30 @@ export default class Module{
                     fill: '#ffffff',
                     lineWidth: 2
                 })
-                .move(- r/2, (i + 1) * span - r/2)
+                .move( position.x, position.y)
+                .mouseup(e => {
+                    if(this.addModuleInfo.startNodeId) {
+                        // 防止触发 chart mouseup事件 清除addModuleInfo 数据
+                        e.stopPropagation();
+                        this.addModuleInfo.endNodeId = module.id;
+                        this.addModuleInfo.endNodeIndex = i;
+                        this.addModuleInfo.end = [position.x + module.x + r/2, position.y + module.y + r/2];
+                        this.addModuleInfo.type = 'line';
+                        this.addModuleInfo.endModule = module;
+                        this.tempLineG.clear();
+                        this.chart.css('cursor', 'grab');
+                        this.chart.fire('addLine')
+                    }
+                })
         }
+
         for(let i=0; i<module.outNum; i++) {
             const span = height / (module.outNum + 1);
-            group
+            const position = {
+                x: width - r/2,
+                y: (i + 1) * span - r/2
+            };
+            const circle = group
                 .circle(r)
                 .css('cursor', 'pointer')
                 .attr({
@@ -79,8 +103,40 @@ export default class Module{
                     fill: '#ffffff',
                     lineWidth: 2
                 })
-                .move(width - r/2, (i + 1) * span - r/2)
-
+                .move( position.x, position.y )
+                .mousedown(e => {
+                    this.tempLineG.clear();
+                    this.tempLineG
+                        .path(generatePoints({
+                            start: [ 0, 0 ],
+                            end: [0, 0 ],
+                        }))
+                        .stroke({
+                            color: '#333',
+                            width: 0.5,
+                            linecap: 'round',
+                            linejoin: 'round'
+                        })
+                        .fill('none')
+                    ;
+                    const start = [e.offsetX, e.offsetY];
+                    this.addModuleInfo.startNodeId = module.id;
+                    this.addModuleInfo.startNodeIndex = i;
+                    this.addModuleInfo.start = [position.x + module.x + r/2, position.y + module.y + r/2];
+                    this.addModuleInfo.startModule = module;
+                    this.chart
+                        .css('cursor', 'default')
+                        .mousemove(null)
+                        .mouseup(null)
+                        .mousemove( e => {
+                            this.handleTempLine([position.x + module.x + r/2, position.y + module.y + r/2], e)
+                        })
+                        .mouseup( e => {
+                            this.tempLineG.clear();
+                            this.chart.css('cursor', 'grab');
+                            this.addModuleInfo.startNodeId = null;
+                        })
+                })
         }
 
         // 绘制title  font属性需设置在move后
@@ -94,7 +150,7 @@ export default class Module{
                 family:'Microsoft YaHei',
                 size: 14,
                 anchor: 'middle',
-            })
+            });
 
         // 模块图片
         group
@@ -104,7 +160,7 @@ export default class Module{
             .move(width/2 - 18, 10)
             .mousedown(e =>{
                 this.handleMove( e, module, group, dragInfo)
-            })
+            });
 
         // 模块运行状态图片
         group
@@ -114,7 +170,7 @@ export default class Module{
             .move(width/2 - 9, 56)
             .mousedown(e =>{
                 this.handleMove( e, module, group, dragInfo)
-            })
+            });
 
         return group
     }
@@ -133,7 +189,6 @@ export default class Module{
                     // const y = e.offsetY - dragInfo.clickY ;
                     const x = e.offsetX / this.matrix.a - dragInfo.clickX;
                     const y = e.offsetY / this.matrix.a - dragInfo.clickY;
-                    console.log(e.offsetX, e.offsetY)
                     requestAnimationFrame(() =>{
                         group.transform({
                             a: 1, b: 0, c: 0, d: 1, e: x , f: y,
@@ -190,8 +245,13 @@ export default class Module{
             })
     }
 
-    handleTempLine() {
-        const line = this.tempLineG
-            .path(generatePoints([]));
+    handleTempLine(start, e) {
+        const target = this
+            .tempLineG
+            .children()[0];
+        target && target.plot(generatePoints({
+            start: start,
+            end: [e.offsetX -this.matrix.e - 1, e.offsetY - this.matrix.f].map( v => v/this.matrix.a)
+        }));
     }
 }

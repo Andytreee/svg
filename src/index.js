@@ -1,17 +1,15 @@
 import { SVG, Rect, Path, G  } from '@svgdotjs/svg.js'
 import {
     generateLinePosition,
-    generatePoints
+    generatePoints, getRandomID
 } from './tool';
 import Module from './Module';
 
 
 
 class TChart {
-    constructor(target= '#app', data) {
+    constructor(target= '#app', data, options = {}) {
         this.chart = SVG().addTo(target).size('100%', '100%');
-        // const rect = new Rect({width: 100, height: 100}).fill('#369');
-        // rect.addTo(this.chart)
         this.container = this.chart.group().addClass( 'tetris-chart-container');
         this.modulesG = this.container.group().addClass('tetris-chart-modules');
         this.linesG  = this.container.group().addClass('tetris-chart-lines');
@@ -32,51 +30,85 @@ class TChart {
             e: 0 ,
             f: 0,
         };
-        this.init(data)
+        // 保存新增连线节点信息
+        this.addModuleInfo = {};
+        this.init(data);
         this.zoom();
-        this.translate();
+        this.drag();
+        this.handleAddLine(options.beforeAddLine);
     }
 
     init({lines, modules, results = 0, resultLines}) {
-        lines.map( line => {
-            this.lines.push({
-                id: line.id,
-                data: line,
-                target: this.linesG
-                    .path(generatePoints(line))
-                    .stroke({
-                        color: '#333',
-                        width: 0.5,
-                        linecap: 'round',
-                        linejoin: 'round'
-                    })
-                    .fill('none')
-                // .mouseover(function() {
-                //     this.css({
-                //             cursor:  'pointer',
-                //             stroke: '#f06',
-                //             lineWidth: 2
-                //         })
-                // })
-            })
-        });
+        this.drawLines(lines);
+        this.drawResultLines(resultLines);
+        this.drawResults(results);
+        this.drawModules(modules);
+    }
 
-        resultLines.map( line => {
-            this.resultLines.push({
-                id: line.id,
-                data: line,
-                target: this.resultLinesG
-                    .path(generatePoints(line))
-                    .stroke({
-                        color: '#333',
-                        width: 0.5,
-                        linecap: 'round',
-                        linejoin: 'round'
-                    })
-                    .fill('none')
-            })
-        });
+    update() {
 
+    }
+
+    drawModules(modules) {
+        modules.map( module => {
+            const group = new Module(module, this.chart, this.container, this.lines, this.resultLines, this.tempLineG, this.matrix, this.addModuleInfo);
+            group.addTo(this.modulesG);
+            this.modules.push({
+                id: module.id,
+                data: module,
+                target: group,
+            })
+        })
+    }
+
+    drawLines(lines) {
+        lines.map( line => this.drawLine(line));
+    }
+
+    drawLine(line) {
+        this.lines.push({
+            id: line.id,
+            data: line,
+            target: this.linesG
+                .path(generatePoints(line))
+                .stroke({
+                    color: '#333',
+                    width: 0.5,
+                    linecap: 'round',
+                    linejoin: 'round'
+                })
+                .fill('none')
+            // .mouseover(function() {
+            //     this.css({
+            //             cursor:  'pointer',
+            //             stroke: '#f06',
+            //             lineWidth: 2
+            //         })
+            // })
+        })
+    }
+
+    drawResultLines(resultLines) {
+        resultLines.map( line => this.drawResultLine(line));
+    }
+
+    drawResultLine(line) {
+        this.resultLines.push({
+            id: line.id,
+            data: line,
+            target: this.resultLinesG
+                .path(generatePoints(line))
+                .stroke({
+                    color: '#333',
+                    width: 0.5,
+                    linecap: 'round',
+                    linejoin: 'round'
+                })
+                .fill('none')
+        })
+    }
+
+    drawResults(results) {
         for(let i = 0; i<= results; i++) {
             this.results.push({
                 id: 0,
@@ -89,30 +121,8 @@ class TChart {
                         lineWidth: 2
                     })
                     .css('cursor', 'pointer')
-
             })
         }
-        this.drawModules(modules)
-    }
-
-    update() {
-
-    }
-
-    drawModules(modules) {
-        modules.map( module => {
-            const group = new Module(module, this.chart, this.container, this.lines, this.resultLines, this.tempLineG, this.matrix);
-            group.addTo(this.modulesG);
-            this.resultLines.push({
-                id: module.id,
-                data: module,
-                target: group,
-            })
-        })
-    }
-
-    move() {
-
     }
 
     zoom() {
@@ -136,8 +146,7 @@ class TChart {
         })
     }
 
-    translate() {
-
+    drag() {
         // 记录拖拽相关位置信息
         const dragInfo = {
             draggable: false,
@@ -149,7 +158,7 @@ class TChart {
         this.container.on('translate', e=> {
             this.container
                 .transform(this.matrix)
-        })
+        });
         this.chart
             .css('cursor', 'grab')
             .mousedown( e => {
@@ -173,6 +182,51 @@ class TChart {
                         dragInfo.offsetX = this.matrix.e;
                         dragInfo.offsetY = this.matrix.f;
                     })
+            })
+    }
+
+    handleAddLine(beforeAddLine) {
+        this
+            .chart
+            .on('addLine', async e => {
+                if(this.addModuleInfo.type === 'line') {
+                    // 节点连线 todo：连线前钩子函数
+                    // if(beforeAddLine) {
+                    //
+                    // }
+                    const id = getRandomID();
+                    this.addModuleInfo.id = id;
+                    const {
+                        startModule,
+                        startNodeId,
+                        startNodeIndex,
+                        endModule,
+                        endNodeId,
+                        endNodeIndex,
+                    } = this.addModuleInfo;
+                    if(!Array.isArray(endModule.in[endNodeIndex])) {
+                        endModule.in[startNodeIndex] = []
+                    }else if(endModule.in[endNodeIndex].length){
+                        // 输入节点只能有一个输入源
+                        return;
+                    }
+                    // if(this.lines.some( ({
+                    //                       startNodeId: sId,
+                    //                       startNodeIndex: sIndex,
+                    //                       endNodeId: eId,
+                    //                       endNodeIndex: eIndex
+                    // }) => sId === startNodeId && startNodeIndex === sIndex && eId === endNodeId && eIndex === endNodeIndex)){
+                    //     // 如果输入/输出节点及index完全相同，表明重复连线
+                    //     return
+                    // }
+                    endModule.in[endNodeIndex].push({ id, type: 'line'});
+                    if(!Array.isArray(startModule.out[startNodeIndex])) {
+                        startModule.out[startNodeIndex] = []
+                    }
+                    startModule.out[startNodeIndex].push({ id, type: 'line'});
+                    this.drawLine(this.addModuleInfo);
+                }
+
             })
     }
 }
