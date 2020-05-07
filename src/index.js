@@ -1,7 +1,9 @@
 import { SVG, Rect, Path, G  } from '@svgdotjs/svg.js'
 import {
     generateLinePosition,
-    generatePoints, getRandomID
+    generatePoints,
+    getRandomID,
+    generateResultPosition
 } from './tool';
 import Module from './Module';
 
@@ -16,6 +18,7 @@ class TChart {
         this.resultLinesG = this.container.group().addClass('tetris-chart-resultLines');
         this.resultsG = this.container.group().addClass('tetris-chart-results');
         this.tempLineG = this.container.group();
+        this.parent = document.querySelector(target);
         this.data = data;
         this.lines = [];
         this.modules = [];
@@ -35,10 +38,11 @@ class TChart {
         this.init(data);
         this.zoom();
         this.drag();
-        this.handleAddLine(options.beforeAddLine);
+        this.handleAddLine();
+        this.hooks = options.hooks || {};
     }
 
-    init({lines, modules, results = 0, resultLines}) {
+    init({lines, modules, results = 1, resultLines}) {
         this.drawLines(lines);
         this.drawResultLines(resultLines);
         this.drawResults(results);
@@ -51,7 +55,7 @@ class TChart {
 
     drawModules(modules) {
         modules.map( module => {
-            const group = new Module(module, this.chart, this.container, this.lines, this.resultLines, this.tempLineG, this.matrix, this.addModuleInfo);
+            const group = new Module(module, this.chart, this.container, this.lines, this.resultLines, this.tempLineG, this.matrix, this.addModuleInfo, this.parent);
             group.addTo(this.modulesG);
             this.modules.push({
                 id: module.id,
@@ -109,18 +113,39 @@ class TChart {
     }
 
     drawResults(results) {
-        for(let i = 0; i<= results; i++) {
+        const r = 20;
+        this.results = [];
+        this.resultsG.clear();
+        console.log({
+            results
+        })
+        console.log(this.resultsG)
+        for(let i = 0; i<= results + 1; i++) {
             this.results.push({
-                id: 0,
+                id: i,
+                linked: this.resultLines.some( line => line.data.endNodeIndex === i),  // 判断是否连接
                 target: this.resultsG
-                    .circle(20)
-                    .move(1780, (i + 1) * 50 - 10)
+                    .circle(r)
+                    .move(this.parent.clientWidth - r - 20, (i + 1) * 50 - 10)
                     .attr({
                         stroke: '#589DF9',
                         fill: '#ffffff',
                         lineWidth: 2
                     })
                     .css('cursor', 'pointer')
+                    .mouseup( e => {
+                        if(this.addModuleInfo.startNodeId) {
+                            // 防止触发 chart mouseup事件 清除addModuleInfo 数据
+                            e.stopPropagation();
+                            this.addModuleInfo.endNodeId = 'result';
+                            this.addModuleInfo.endNodeIndex = i;
+                            this.addModuleInfo.end = generateResultPosition(i);
+                            this.addModuleInfo.type = 'resultLine';
+                            this.tempLineG.clear();
+                            this.chart.css('cursor', 'grab');
+                            this.chart.fire('addLine')
+                        }
+                    })
             })
         }
     }
@@ -185,7 +210,7 @@ class TChart {
             })
     }
 
-    handleAddLine(beforeAddLine) {
+    handleAddLine() {
         this
             .chart
             .on('addLine', async e => {
@@ -198,10 +223,8 @@ class TChart {
                     this.addModuleInfo.id = id;
                     const {
                         startModule,
-                        startNodeId,
                         startNodeIndex,
                         endModule,
-                        endNodeId,
                         endNodeIndex,
                     } = this.addModuleInfo;
                     if(!Array.isArray(endModule.in[endNodeIndex])) {
@@ -210,24 +233,53 @@ class TChart {
                         // 输入节点只能有一个输入源
                         return;
                     }
-                    // if(this.lines.some( ({
-                    //                       startNodeId: sId,
-                    //                       startNodeIndex: sIndex,
-                    //                       endNodeId: eId,
-                    //                       endNodeIndex: eIndex
-                    // }) => sId === startNodeId && startNodeIndex === sIndex && eId === endNodeId && eIndex === endNodeIndex)){
-                    //     // 如果输入/输出节点及index完全相同，表明重复连线
-                    //     return
-                    // }
                     endModule.in[endNodeIndex].push({ id, type: 'line'});
                     if(!Array.isArray(startModule.out[startNodeIndex])) {
                         startModule.out[startNodeIndex] = []
                     }
                     startModule.out[startNodeIndex].push({ id, type: 'line'});
                     this.drawLine(this.addModuleInfo);
+                }else if(this.addModuleInfo.type === 'resultLine') {
+                    const id = getRandomID();
+                    this.addModuleInfo.id = id;
+                    const {
+                        startModule,
+                        startNodeIndex,
+                        endNodeIndex,
+                    } = this.addModuleInfo;
+                    console.log(this.results, endNodeIndex)
+                    if(this.results[endNodeIndex].linked) {
+                        // 如果该结果点已经连接则不允许再连接
+                        return;
+                    }
+                    if(!Array.isArray(startModule.out[startNodeIndex])) {
+                        startModule.out[startNodeIndex] = []
+                    }
+                    if(startModule.out[startNodeIndex].some(({type}) => type === 'result')) {
+                        // 一个节点的输出节点只能连接一个结果点
+                        return;
+                    }
+                    startModule.out[startNodeIndex].push({ id, type: 'result'});
+                    this.drawResultLine(this.addModuleInfo);
+                    // 增加结果点
+                    this.checkResults(endNodeIndex)
                 }
-
             })
+    }
+
+    checkResults(index) {
+        let i = this.results.length - 1;
+        if(i === index) {
+            // 连接最后一个点
+            return this.drawResults(i)
+        }
+        while(i) {
+            i--;
+            if(this.results[i].linked) {
+                return this.drawResults(i)
+            }
+        }
+        return index;
     }
 }
 

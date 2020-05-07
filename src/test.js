@@ -989,4 +989,4 @@ const data = {
     }],
 }
 
-new TChart('#app',transformData(data));
+new TChart('#app',transformData(data, '#app'));

@@ -6,11 +6,12 @@ import {
     width,
     textH,
     modulesKV,
-    status
+    status,
+    generateResultPosition
 } from "./tool";
 
 export default class Module{
-    constructor(module, chart, container, lines, resultLines, tempLineG, matrix, addModuleInfo) {
+    constructor(module, chart, container, lines, resultLines, tempLineG, matrix, addModuleInfo, parent) {
         this.lines = lines;
         this.chart = chart;
         this.resultLines = resultLines;
@@ -119,7 +120,6 @@ export default class Module{
                         })
                         .fill('none')
                     ;
-                    const start = [e.offsetX, e.offsetY];
                     this.addModuleInfo.startNodeId = module.id;
                     this.addModuleInfo.startNodeIndex = i;
                     this.addModuleInfo.start = [position.x + module.x + r/2, position.y + module.y + r/2];
@@ -232,7 +232,7 @@ export default class Module{
                                             type: module.type,
                                             index:  line.data.startNodeIndex,
                                         });
-                                        line.data.end = [1780, (line.data.endNodeIndex + 1) * 50 ];
+                                        line.data.end = generateResultPosition(line.data.endNodeIndex);
                                         line.target.plot(generatePoints(line.data))
                                     })
                             })

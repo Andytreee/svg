@@ -17,6 +17,11 @@ import success from './status/success.png';
 export const width  = 100;
 export const height = 86;
 export const textH  = 24;
+export const resultInfo = {
+    r: 20,
+    marginTop: 50,
+    marginRight: 20,
+};
 export const modulesKV = {
     // 数据源
     '11': {
@@ -343,7 +348,7 @@ export function getRandomID(randomLength = 8) {
     ).toString(36);
 }
 
-export function transformData({ nodes, edges }) {
+export function transformData({ nodes, edges }, target) {
     edges = edges.map(({ id, startNodeId, startNodeIndex,  endNodeId, endNodeIndex }) => {
         const startNode = nodes.find(({id}) => id === startNodeId);
         const endNode = nodes.find(({id}) => id === endNodeId);
@@ -369,7 +374,7 @@ export function transformData({ nodes, edges }) {
             endNodeIndex,
         }
     });
-    const { results, resultLines } = generateResultsAndResultLines(nodes);
+    const { results, resultLines } = generateResultsAndResultLines(nodes, document.querySelector(target).clientWidth);
 
     nodes = nodes.map(({ id, type, name, locationX, locationY, status, }) => {
         const node = {
@@ -410,15 +415,15 @@ export function transformData({ nodes, edges }) {
 export function generateLinePosition( directionType, { x, y, type, index}) {
     if(directionType === 'start') {
         x = x + width;
-        y = y + (1+ index) * height/(modulesKV[type].outputNum + 1)
+        y = y + (1+ index) * height/(modulesKV[type].outputNum + 1);
         return [x, y]
     }else{
-        y = y + (1+ index) * height/(modulesKV[type].inputNum + 1)
+        y = y + (1+ index) * height/(modulesKV[type].inputNum + 1);
         return [x, y]
     }
 }
 
-export function generateResultsAndResultLines(nodes) {
+export function generateResultsAndResultLines(nodes, width) {
     // 含有结果点的线
     const rawData = nodes.filter(({endIndex}) => endIndex.length);
     const resultLines = [];
@@ -432,7 +437,7 @@ export function generateResultsAndResultLines(nodes) {
             resultLines.push({
                 id: getRandomID(),
                 start: generateLinePosition('start', {x, y, type, index: nodeIndex}),
-                end: [1780, (resultIndex + 1) * 50 ],
+                end: generateResultPosition(resultIndex, width),
                 startNodeId: id,
                 startNodeIndex: nodeIndex,
                 endNodeId: 'result',
@@ -442,6 +447,10 @@ export function generateResultsAndResultLines(nodes) {
         }
     }
     return { resultLines, results: maxResultIndex }
+}
+export function generateResultPosition(i, width) {
+    if(!generateResultPosition.width) generateResultPosition.width = width;
+    return [ generateResultPosition.width - resultInfo.r/2 - resultInfo.marginRight, (i + 1) * resultInfo.marginTop ];
 }
 
 export function generateModules(nodes) {
