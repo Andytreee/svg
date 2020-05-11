@@ -113,8 +113,8 @@ class TChart {
         const target  = g
             .path(generatePoints(line))
             .stroke({
-                color: '#333',
-                width: 0.5,
+                color: '#999',
+                width: 1,
                 linecap: 'round',
                 linejoin: 'round'
             })
@@ -124,7 +124,9 @@ class TChart {
         target.node.oncontextmenu = e => {
             this.deleteLineInfo.id = line.id;
             this.deleteLineInfo.type = type;
+            console.log(target.array())
             this.chart.fire('deleteLine');
+
         };
         return target
     }
@@ -208,6 +210,10 @@ class TChart {
                 dragInfo.draggable = true;
                 dragInfo.originX = e.offsetX;
                 dragInfo.originY = e.offsetY;
+                console.log({
+                    x: e.offsetX,
+                    y: e.offsetY,
+                })
                 this.chart
                     .mousemove(null)
                     .mouseup(null)
@@ -366,8 +372,7 @@ class TChart {
             this.chart.fire('menuHide');
             const module = this.findModuleInModules(this.deleteModule.id);
             //  删除连线
-            // console.log(module);
-            module.data.in.map( arr => arr.map(({id}) => deleteLine(id)));
+            module.data.in.map( arr => arr.map(({id}) => this.deleteLine(id)));
             module.data.out.map( arr => arr.map(({id, type}) => {
                 if(type === 'line') {
                     this.deleteLine(id);

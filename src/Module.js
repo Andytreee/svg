@@ -59,16 +59,17 @@ export default class Module{
             .radius(10)
             .css({
                 cursor: 'move',
-                fill: '#fff',
-                stroke: '#333',
-                lineWidth: 2
+                fill: '#e1efff',
+                opacity: 0.7,
+                stroke: 'transparent',
+                lineWidth: 1
             })
             .mousedown(e =>{
                 this.handleMove( e, module, group, dragInfo)
             });
-
+        // 0 0 5px 5px rgba(0, 160, 233, 0.2)
         // 绘制模块小圆点
-        const r  = 10;
+        const r  = 12;    // 直径
         for(let i=0; i<module.inNum; i++) {
             const span = height / (module.inNum + 1);
             const position = {
@@ -79,9 +80,10 @@ export default class Module{
                 .circle(r)
                 .css('cursor', 'pointer')
                 .attr({
-                    stroke: '#589DF9',
-                    fill: '#ffffff',
-                    lineWidth: 2
+                    // stroke: '#589DF9',
+                    fill: '#000',
+                    opacity: 0.4,
+                    // lineWidth: 2
                 })
                 .move( position.x, position.y)
                 .mouseup(e => {
@@ -110,9 +112,8 @@ export default class Module{
                 .circle(r)
                 .css('cursor', 'pointer')
                 .attr({
-                    stroke: '#589DF9',
-                    fill: '#ffffff',
-                    lineWidth: 2
+                    fill: '#000',
+                    opacity: 0.4,
                 })
                 .move( position.x, position.y )
                 .mousedown(e => {
