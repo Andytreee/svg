@@ -5,6 +5,7 @@ import {
     getRandomID,
     generateResultPosition
 } from './tool';
+import '@svgdotjs/svg.filter.js';
 import Module from './Module';
 import './index.css'
 
@@ -66,6 +67,19 @@ class TChart {
         this.drawResultLines(resultLines);
         this.drawResults(results);
         this.drawModules(modules);
+        this.chart.defs().node.innerHTML =
+            `
+         <filter id="f1" x="-40%" y="-40%" width="180%" height="180%" filterUnits="userSpaceOnUse">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/> 
+      <feOffset dx="0" dy="0" result="offsetblur"/> 
+      <feOffset dx="0" dy="0" result="offsetblur"/>
+      <feMerge> 
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+`
     }
 
     update() {
@@ -124,9 +138,7 @@ class TChart {
         target.node.oncontextmenu = e => {
             this.deleteLineInfo.id = line.id;
             this.deleteLineInfo.type = type;
-            console.log(target.array())
             this.chart.fire('deleteLine');
-
         };
         return target
     }
@@ -210,10 +222,6 @@ class TChart {
                 dragInfo.draggable = true;
                 dragInfo.originX = e.offsetX;
                 dragInfo.originY = e.offsetY;
-                console.log({
-                    x: e.offsetX,
-                    y: e.offsetY,
-                })
                 this.chart
                     .mousemove(null)
                     .mouseup(null)
@@ -296,7 +304,6 @@ class TChart {
         this.resultLines.map(({data: {endNodeIndex}}) => {
             if(endNodeIndex > maxResultIndex) maxResultIndex = endNodeIndex;
         });
-        console.log(maxResultIndex, this.resultLines)
         this.drawResults(maxResultIndex)
     }
 
@@ -316,11 +323,7 @@ class TChart {
     deleteLine(id) {
         try{
             // 删除dom节点
-            // console.log(this.findLineInLines(id))
             const line = this.findLineInLines(id);
-            console.log({
-                line
-            })
             if(line) line.target.node.remove();
             const index = this.findLineIndexInLines(id);
             if(index > -1) {

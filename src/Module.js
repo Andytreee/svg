@@ -1,4 +1,5 @@
 import { G } from "@svgdotjs/svg.js";
+import '@svgdotjs/svg.filter.js';
 import {
     generateLinePosition,
     generatePoints,
@@ -40,15 +41,29 @@ export default class Module{
                 e.stopPropagation();
                 // 隐藏右键菜单
                 this.chart.fire('menuHide');
+                // 高亮当前选中节点
+                group
+                    .parent()
+                    .each( (i, g) => {
+                        g
+                            .first()
+                            .css({
+                                stroke: 'transparent',
+                                // filter: ''
+                            });
+                    });
+                group
+                    .first()
+                    .css({
+                        stroke: '#00a0e9',
+                        // filter: 'url(#f1)'
+                    })
             })
+
             .node.oncontextmenu = e => {
                 this.chart.fire('menuShow', e);
                 this.deleteModule.id = module.id;
             };
-        // .native()
-        // .on('contextMenu', e => {
-        //     console.log(e)
-        // })
         // 记录拖拽相关位置信息
         const dragInfo = {
             draggable: false,
@@ -62,11 +77,13 @@ export default class Module{
                 fill: '#e1efff',
                 opacity: 0.7,
                 stroke: 'transparent',
-                lineWidth: 1
+                lineWidth: 2
             })
             .mousedown(e =>{
-                this.handleMove( e, module, group, dragInfo)
+                // 定义模块拖拽事件
+                this.handleMove( e, module, group, dragInfo);
             });
+
         // 0 0 5px 5px rgba(0, 160, 233, 0.2)
         // 绘制模块小圆点
         const r  = 12;    // 直径
@@ -232,7 +249,7 @@ export default class Module{
                                         });
                                         line.target.plot(generatePoints(line.data))
                                     })
-                            })
+                            });
                             module.out.map( outs => {
                                 this.resultLines
                                     .filter( ({id}) => outs.some(({id: inId}) => inId === id) )
@@ -246,7 +263,7 @@ export default class Module{
                                         line.data.end = generateResultPosition(line.data.endNodeIndex);
                                         line.target.plot(generatePoints(line.data))
                                     })
-                            })
+                            });
                         }
                     });
                 }
