@@ -31,6 +31,11 @@ class TChart {
         this.modules = [];
         this.results = [];
         this.resultLines = [];
+        // 要删除的连线
+        this.deleteLineInfo = {
+            type: '',
+            id: null
+        };
         // 要删除的模块id
         this.deleteModule = {
             id: null
@@ -51,7 +56,9 @@ class TChart {
         this.drag();
         this.handleAddLine();
         this.hooks = options.hooks || {};
-        this.chartOnMenu()
+        this.onModuleContextMenu();
+        this.onLineContextMenu();
+
     }
 
     init({lines, modules, results = 1, resultLines}) {
@@ -85,23 +92,7 @@ class TChart {
         this.lines.push({
             id: line.id,
             data: line,
-            target: this.linesG
-                .path(generatePoints(line))
-                .stroke({
-                    color: '#333',
-                    width: 0.5,
-                    linecap: 'round',
-                    linejoin: 'round'
-                })
-                .fill('none')
-                .css('cursor', 'pointer')
-            // .mouseover(function() {
-            //     this.css({
-            //             cursor:  'pointer',
-            //             stroke: '#f06',
-            //             lineWidth: 2
-            //         })
-            // })
+            target: this.generateLine(this.linesG, line),
         })
     }
 
@@ -113,17 +104,29 @@ class TChart {
         this.resultLines.push({
             id: line.id,
             data: line,
-            target: this.resultLinesG
-                .path(generatePoints(line))
-                .stroke({
-                    color: '#333',
-                    width: 0.5,
-                    linecap: 'round',
-                    linejoin: 'round'
-                })
-                .fill('none')
-                .css('cursor', 'pointer')
+            target: this.generateLine(this.resultLinesG, line, 'result'),
         })
+    }
+
+    generateLine(g, line, type = 'line') {
+        // 线样式
+        const target  = g
+            .path(generatePoints(line))
+            .stroke({
+                color: '#333',
+                width: 0.5,
+                linecap: 'round',
+                linejoin: 'round'
+            })
+            .fill('none')
+            .css('cursor', 'pointer');
+        // contextmenu事件
+        target.node.oncontextmenu = e => {
+            this.deleteLineInfo.id = line.id;
+            this.deleteLineInfo.type = type;
+            this.chart.fire('deleteLine');
+        };
+        return target
     }
 
     drawResults(results) {
@@ -159,14 +162,14 @@ class TChart {
             })
         }
     }
-
+    // 画布缩放
     zoom() {
         this.container.on('zoom', e=> {
             this.container
                 .matrix(this.matrix);
             this.chart.fire('menuHide');
         });
-        document.querySelector('#app').addEventListener('wheel', e=> {
+        function handleZoom(e) {
             e.preventDefault();
             if(e.deltaY > 0 && this.matrix.a < 2) {
                 this.matrix.a += 0.2;
@@ -178,11 +181,10 @@ class TChart {
                 this.matrix.d -= 0.2;
                 this.container.fire('zoom')
             }
-
-        })
-
+        }
+        this.chart.node.addEventListener('wheel', handleZoom.bind(this))
     }
-
+    // 画布拖拽
     drag() {
         // 记录拖拽相关位置信息
         const dragInfo = {
@@ -192,12 +194,15 @@ class TChart {
             offsetX: 0,
             offsetY: 0,
         };
-        this.container.on('translate', e=> {
-            this.container
-                .matrix(this.matrix);
-            this.chart.fire('menuHide');
-        });
-        this.chart
+        this
+            .container
+            .on('translate', e=> {
+                this.container
+                    .matrix(this.matrix);
+                this.chart.fire('menuHide');
+            });
+        this
+            .chart
             .css('cursor', 'grab')
             .mousedown( e => {
                 dragInfo.draggable = true;
@@ -289,58 +294,73 @@ class TChart {
         this.drawResults(maxResultIndex)
     }
 
-    chartOnMenu() {
-        this.chart.on('menuShow', e => {
-            // 设置节点位置
-            const { offsetX, offsetY } = e.detail;
-            this.contextMenu.style.display = 'inline-block';
-            this.contextMenu.style.left = offsetX + 'px';
-            this.contextMenu.style.top  = offsetY + 'px';
-        });
+    onLineContextMenu() {
+        this
+            .chart
+            .on('deleteLine', e => {
+                if(this.deleteLineInfo.type === 'line') {
+                    this.deleteLine(this.deleteLineInfo.id)
+                }else if(this.deleteLineInfo.type === 'result') {
+                    this.deleteResultLine(this.deleteLineInfo.id)
+                }
+                this.updateResults();
+            })
+    }
+
+    deleteLine(id) {
+        try{
+            // 删除dom节点
+            // console.log(this.findLineInLines(id))
+            const line = this.findLineInLines(id);
+            console.log({
+                line
+            })
+            if(line) line.target.node.remove();
+            const index = this.findLineIndexInLines(id);
+            if(index > -1) {
+                // 删除存储的数据
+                this.lines.splice(index, 1);
+            }
+        }catch (e) {
+            console.error(e)
+        }
+    }
+
+    deleteResultLine(id) {
+        try{
+            // 删除dom节点
+            // console.log(id, this.findLineInResultLines(id));
+            const resultLine = this.findLineInResultLines(id);
+            console.log({
+                resultLine
+            })
+            if(resultLine) resultLine.target.node.remove();
+            const index = this.findLineIndexInResultLines(id);
+            if(index > -1) {
+                // 删除存储的数据
+                this.resultLines.splice(index, 1);
+            }
+        }catch (e) {
+            console.error(e)
+        }
+    }
+
+    onModuleContextMenu() {
+        this
+            .chart
+            .on('menuShow', e => {
+                // 设置节点位置
+                const { offsetX, offsetY } = e.detail;
+                this.contextMenu.style.display = 'inline-block';
+                this.contextMenu.style.left = offsetX + 'px';
+                this.contextMenu.style.top  = offsetY + 'px';
+            });
         const hideMenu = () => {
             this.contextMenu.style.display = 'none';
         };
         this.chart.on('menuHide', hideMenu);
         this.chart.click(hideMenu);
         // 暂时删除功能写在这里
-        const deleteLine = id => {
-            try{
-                // 删除dom节点
-                // console.log(this.findLineInLines(id))
-                const line = this.findLineInLines(id);
-                console.log({
-                    line
-                })
-                if(line) line.target.node.remove();
-                const index = this.findLineIndexInLines(id);
-                if(index > -1) {
-                    // 删除存储的数据
-                    this.lines.splice(index, 1);
-                }
-            }catch (e) {
-                console.error(e)
-            }
-        };
-
-        const deleteResultLine = id => {
-            try{
-                // 删除dom节点
-                // console.log(id, this.findLineInResultLines(id));
-                const resultLine = this.findLineInResultLines(id);
-                console.log({
-                    resultLine
-                })
-                if(resultLine) resultLine.target.node.remove();
-                const index = this.findLineIndexInResultLines(id);
-                if(index > -1) {
-                    // 删除存储的数据
-                    this.resultLines.splice(index, 1);
-                }
-            }catch (e) {
-                console.error(e)
-            }
-        };
-
         const handleDelete = e => {
             // 隐藏右键菜单
             this.chart.fire('menuHide');
@@ -350,9 +370,9 @@ class TChart {
             module.data.in.map( arr => arr.map(({id}) => deleteLine(id)));
             module.data.out.map( arr => arr.map(({id, type}) => {
                 if(type === 'line') {
-                    deleteLine(id);
+                    this.deleteLine(id);
                 }else{
-                    deleteResultLine(id);
+                    this.deleteResultLine(id);
                 }
             }));
 
