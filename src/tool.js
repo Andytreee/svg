@@ -384,8 +384,8 @@ export function transformData({ nodes, edges }, target) {
             y: locationY,
             inNum: modulesKV[type].inputNum,
             outNum: modulesKV[type].outputNum,
-            in: [],
-            out: [],
+            in: generateArray([], modulesKV[type].inputNum),
+            out: generateArray([], modulesKV[type].outputNum),
             status,
             type,
         };
@@ -470,6 +470,10 @@ export function generatePoints({start, end}) {
         cpy2: end[1],
         x2: end[0],
         y2: end[1],
-    }
+    };
     return Object.values(data).join(' ')
+}
+
+export function generateArray(item, length ) {
+    return Array.from({length}).map(() => JSON.parse(JSON.stringify(item)));
 }

@@ -1,0 +1,139 @@
+.tetris-svg-context-menu{
+    display:none;
+    position: absolute;
+    left: -1000px;
+    top: -1000px;
+
+    width: 120px;
+    border-radius:3px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 3px 1px rgba(0,0,0,0.2);
+
+    background: #fff;
+
+    /*opacity:0;*/
+    transition: all 200ms ease-in-out;
+    /*transition: all .3s;*/
+    user-select: none;
+}
+.tetris-svg-context-menu ul{
+    padding: 6px 0;
+    margin: 0;
+}
+.tetris-svg-context-menu li{
+    height: 20px;
+    line-height: 20px;
+    padding: 4px 12px;
+    color: #666;
+    list-style: none;
+    cursor: pointer;
+}
+.tetris-svg-context-menu li:hover{
+    color: #999;
+    background-color: #eee;
+}
+.tetris-svg-context-menu li>span{
+    margin-right: 5px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.tetris-svg-title-close{
+    font-size:3px;
+    float:right;
+    cursor: pointer;
+    color:#666;
+}
+.tetris-svg-context-menu-head{
+    padding:0px 6px;
+}
+.tetris-svg-context-menu-head-item{
+    display: inline-block;
+    vertical-align: top;
+    width:35px;
+    height:33px;
+    position: relative;
+    margin:0px 2px;
+}
+.tetris-svg-context-menu-head-item.active:before{
+    background:#2EB5E5 !important;
+}
+.tetris-svg-context-menu-head-item:before{
+    position:absolute;
+    width:100%;
+    height:3px;
+    background:#f0f5f7;
+    left:0px;
+    bottom:-3px;
+    content:""
+}
+.tetris-svg-context-menu-head .tetris-svg-icons{
+    font-size:20px;
+    color:#888;
+    transition: all 80ms ease-in-out;
+    cursor: pointer;
+    position: absolute;
+    top: 3px;
+    left: 6px;
+}
+.tetris-svg-context-menu-head .tetris-svg-icons.active{
+    color:#2EB5E5;
+}
+.tetris-svg-context-menu-head .tetris-svg-icons:hover{
+    color:#2EB5E5;
+}
+.tetris-svg-context-menu-sub{
+    background:#f0f5f7;
+    height:3px;
+}
+
+.tetris-svg-context-menu-content{}
+.tetris-svg-context-menu-content ul,.tetris-svg-context-global-menu ul{
+    list-style: none;
+    padding:0px;
+    margin-top:6px;
+    margin-bottom:5px;
+}
+.tetris-svg-context-menu-content li,.tetris-svg-context-global-menu li{
+    list-style: none;
+    padding:3px 12px;font-size:12px;
+    line-height:18px;
+    cursor: pointer;
+    transition: all 120ms ease-in-out;
+    position:relative;
+}
+.tetris-svg-context-global-menu li .tetris-svg-icons{
+    margin-right:6px;
+    font-size:17px;
+    color:#464646;
+}
+.tetris-svg-context-menu-content li.disable,.tetris-svg-context-global-menu li.disable{
+    opacity:.8;
+    cursor:default;
+    color:#aaa;
+    pointer-events: inherit;
+}
+.tetris-svg-context-menu-content li.disable:hover,.tetris-svg-context-global-menu li.disable:hover{
+    background:#fff;
+}
+.tetris-svg-context-menu-content li:hover,.tetris-svg-context-global-menu li:hover{
+    background:#f3f3f3;
+}
+.tetris-svg-context-menu-content li span{
+    float:right;
+}
+.tetris-svg-context-menu-content li label.tetris-svg-tip{
+    float:right;
+    font-size:14px;color:#888;display:none;
+}

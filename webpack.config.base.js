@@ -4,8 +4,8 @@ import webpack from 'webpack';
 import autoprefixer from 'autoprefixer';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import {CleanWebpackPlugin} from 'clean-webpack-plugin';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 export default {
     entry: {        
@@ -29,25 +29,12 @@ export default {
         }, {
             test: /\.css$/,
             include: [path.join(__dirname, 'src')],
-            use: ExtractTextPlugin.extract([
+            use: [
+                MiniCssExtractPlugin.loader,
                 'css-loader',
-                'postcss-loader'
-            ])
-        }, {
-            test: /\.css$/,
-            include: [path.join(__dirname, 'src')],
-            use: ExtractTextPlugin.extract([
-                {
-                    loader: 'css-loader',
-                    options: {
-                        modules: true,
-                        importLoaders: 2,
-                        localIdentName: '[local]__[hash:base64:5]'
-                    }
-                },
-                'postcss-loader'
-            ])
-        }, {
+                'postcss-loader',
+            ],
+        },  {
             test: /\.(gif|jpg|png|woff|svg|eot|ttf)$/,
             use: [{
                 loader: 'url-loader',
@@ -58,6 +45,7 @@ export default {
         }]
     },
     plugins: [
+        new MiniCssExtractPlugin(),
         new CaseSensitivePathsPlugin(),                      // 文件大小写检测
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({                                // 主页面入口index.html

@@ -6,12 +6,13 @@ import {
     generateResultPosition
 } from './tool';
 import Module from './Module';
-
+import './index.css'
 
 
 class TChart {
     constructor(target= '#app', data, options = {}) {
         this.chart = SVG().addTo(target).size('100%', '100%');
+        this.chart.node.oncontextmenu = e => e.preventDefault();   // 阻止浏览器默认菜单
         this.container = this.chart.group().addClass( 'tetris-chart-container');
         this.modulesG = this.container.group().addClass('tetris-chart-modules');
         this.linesG  = this.container.group().addClass('tetris-chart-lines');
@@ -19,11 +20,21 @@ class TChart {
         this.resultsG = this.container.group().addClass('tetris-chart-results');
         this.tempLineG = this.container.group();
         this.parent = document.querySelector(target);
+        this.contextMenu = document.createElement('div');
+        this.contextMenu.classList.add('tetris-svg-context-menu');
+        this.contextMenu.innerHTML = `<ul>
+                    <li><span></span> 删除</li> 
+                </ul>`;
+        this.parent.appendChild(this.contextMenu);
         this.data = data;
         this.lines = [];
         this.modules = [];
         this.results = [];
         this.resultLines = [];
+        // 要删除的模块id
+        this.deleteModule = {
+            id: null
+        };
         // container 初始缩放 位置参数
         this.matrix = {
             a: 1,
@@ -40,6 +51,7 @@ class TChart {
         this.drag();
         this.handleAddLine();
         this.hooks = options.hooks || {};
+        this.chartOnMenu()
     }
 
     init({lines, modules, results = 1, resultLines}) {
@@ -55,7 +67,7 @@ class TChart {
 
     drawModules(modules) {
         modules.map( module => {
-            const group = new Module(module, this.chart, this.container, this.lines, this.resultLines, this.tempLineG, this.matrix, this.addModuleInfo, this.parent);
+            const group = new Module(module, this.chart, this.container, this.lines, this.resultLines, this.tempLineG, this.matrix, this.addModuleInfo, this.parent, this.deleteModule);
             group.addTo(this.modulesG);
             this.modules.push({
                 id: module.id,
@@ -82,6 +94,7 @@ class TChart {
                     linejoin: 'round'
                 })
                 .fill('none')
+                .css('cursor', 'pointer')
             // .mouseover(function() {
             //     this.css({
             //             cursor:  'pointer',
@@ -109,6 +122,7 @@ class TChart {
                     linejoin: 'round'
                 })
                 .fill('none')
+                .css('cursor', 'pointer')
         })
     }
 
@@ -116,10 +130,6 @@ class TChart {
         const r = 20;
         this.results = [];
         this.resultsG.clear();
-        console.log({
-            results
-        })
-        console.log(this.resultsG)
         for(let i = 0; i<= results + 1; i++) {
             this.results.push({
                 id: i,
@@ -153,8 +163,9 @@ class TChart {
     zoom() {
         this.container.on('zoom', e=> {
             this.container
-                .transform(this.matrix)
-        })
+                .matrix(this.matrix);
+            this.chart.fire('menuHide');
+        });
         document.querySelector('#app').addEventListener('wheel', e=> {
             e.preventDefault();
             if(e.deltaY > 0 && this.matrix.a < 2) {
@@ -169,6 +180,7 @@ class TChart {
             }
 
         })
+
     }
 
     drag() {
@@ -182,7 +194,8 @@ class TChart {
         };
         this.container.on('translate', e=> {
             this.container
-                .transform(this.matrix)
+                .matrix(this.matrix);
+            this.chart.fire('menuHide');
         });
         this.chart
             .css('cursor', 'grab')
@@ -214,6 +227,9 @@ class TChart {
         this
             .chart
             .on('addLine', async e => {
+                console.log({
+                    info: this.addModuleInfo
+                })
                 if(this.addModuleInfo.type === 'line') {
                     // 节点连线 todo：连线前钩子函数
                     // if(beforeAddLine) {
@@ -227,16 +243,11 @@ class TChart {
                         endModule,
                         endNodeIndex,
                     } = this.addModuleInfo;
-                    if(!Array.isArray(endModule.in[endNodeIndex])) {
-                        endModule.in[startNodeIndex] = []
-                    }else if(endModule.in[endNodeIndex].length){
+                    if(endModule.in[endNodeIndex].length){
                         // 输入节点只能有一个输入源
                         return;
                     }
                     endModule.in[endNodeIndex].push({ id, type: 'line'});
-                    if(!Array.isArray(startModule.out[startNodeIndex])) {
-                        startModule.out[startNodeIndex] = []
-                    }
                     startModule.out[startNodeIndex].push({ id, type: 'line'});
                     this.drawLine(this.addModuleInfo);
                 }else if(this.addModuleInfo.type === 'resultLine') {
@@ -247,39 +258,141 @@ class TChart {
                         startNodeIndex,
                         endNodeIndex,
                     } = this.addModuleInfo;
-                    console.log(this.results, endNodeIndex)
                     if(this.results[endNodeIndex].linked) {
                         // 如果该结果点已经连接则不允许再连接
                         return;
-                    }
-                    if(!Array.isArray(startModule.out[startNodeIndex])) {
-                        startModule.out[startNodeIndex] = []
                     }
                     if(startModule.out[startNodeIndex].some(({type}) => type === 'result')) {
                         // 一个节点的输出节点只能连接一个结果点
                         return;
                     }
                     startModule.out[startNodeIndex].push({ id, type: 'result'});
-                    this.drawResultLine(this.addModuleInfo);
+                    console.log(this.addModuleInfo)
+                    // 复制新增节点信息
+                    const info = {};
+                    for(let key in this.addModuleInfo) {
+                        info[key] = this.addModuleInfo[key]
+                    }
+                    this.drawResultLine(info);
                     // 增加结果点
-                    this.checkResults(endNodeIndex)
+                    this.updateResults()
                 }
             })
     }
 
-    checkResults(index) {
-        let i = this.results.length - 1;
-        if(i === index) {
-            // 连接最后一个点
-            return this.drawResults(i)
-        }
-        while(i) {
-            i--;
-            if(this.results[i].linked) {
-                return this.drawResults(i)
+    updateResults() {
+        let maxResultIndex = 0;
+        this.resultLines.map(({data: {endNodeIndex}}) => {
+            if(endNodeIndex > maxResultIndex) maxResultIndex = endNodeIndex;
+        });
+        console.log(maxResultIndex, this.resultLines)
+        this.drawResults(maxResultIndex)
+    }
+
+    chartOnMenu() {
+        this.chart.on('menuShow', e => {
+            // 设置节点位置
+            const { offsetX, offsetY } = e.detail;
+            this.contextMenu.style.display = 'inline-block';
+            this.contextMenu.style.left = offsetX + 'px';
+            this.contextMenu.style.top  = offsetY + 'px';
+        });
+        const hideMenu = () => {
+            this.contextMenu.style.display = 'none';
+        };
+        this.chart.on('menuHide', hideMenu);
+        this.chart.click(hideMenu);
+        // 暂时删除功能写在这里
+        const deleteLine = id => {
+            try{
+                // 删除dom节点
+                // console.log(this.findLineInLines(id))
+                const line = this.findLineInLines(id);
+                console.log({
+                    line
+                })
+                if(line) line.target.node.remove();
+                const index = this.findLineIndexInLines(id);
+                if(index > -1) {
+                    // 删除存储的数据
+                    this.lines.splice(index, 1);
+                }
+            }catch (e) {
+                console.error(e)
             }
-        }
-        return index;
+        };
+
+        const deleteResultLine = id => {
+            try{
+                // 删除dom节点
+                // console.log(id, this.findLineInResultLines(id));
+                const resultLine = this.findLineInResultLines(id);
+                console.log({
+                    resultLine
+                })
+                if(resultLine) resultLine.target.node.remove();
+                const index = this.findLineIndexInResultLines(id);
+                if(index > -1) {
+                    // 删除存储的数据
+                    this.resultLines.splice(index, 1);
+                }
+            }catch (e) {
+                console.error(e)
+            }
+        };
+
+        const handleDelete = e => {
+            // 隐藏右键菜单
+            this.chart.fire('menuHide');
+            const module = this.findModuleInModules(this.deleteModule.id);
+            //  删除连线
+            // console.log(module);
+            module.data.in.map( arr => arr.map(({id}) => deleteLine(id)));
+            module.data.out.map( arr => arr.map(({id, type}) => {
+                if(type === 'line') {
+                    deleteLine(id);
+                }else{
+                    deleteResultLine(id);
+                }
+            }));
+
+            // 删除节点
+            module.target.node.remove();
+            const index = this.findModuleIndexInModules(this.deleteModule.id);
+            if(index > -1) {
+                // 删除存储的数据
+                this.modules.splice(index, 1);
+            }
+            // 重绘结果点
+            this.updateResults()
+        };
+
+        document.querySelector('.tetris-svg-context-menu').addEventListener('click', handleDelete)
+    }
+
+
+    findModuleInModules(targetId) {
+        return this.modules.find(({id}) => id === targetId)
+    }
+
+    findModuleIndexInModules(targetId) {
+        return this.modules.findIndex(({id}) => id === targetId)
+    }
+
+    findLineInLines(targetId) {
+        return this.lines.find(({id}) => id === targetId);
+    }
+
+    findLineIndexInLines(targetId) {
+        return this.lines.findIndex(({id}) => id === targetId);
+    }
+
+    findLineInResultLines(targetId) {
+        return this.resultLines.find(({id}) => id === targetId);
+    }
+
+    findLineIndexInResultLines(targetId) {
+        return this.resultLines.findIndex(({id}) => id === targetId);
     }
 }
 

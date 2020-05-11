@@ -11,7 +11,7 @@ import {
 } from "./tool";
 
 export default class Module{
-    constructor(module, chart, container, lines, resultLines, tempLineG, matrix, addModuleInfo, parent) {
+    constructor(module, chart, container, lines, resultLines, tempLineG, matrix, addModuleInfo, parent,deleteModule) {
         this.lines = lines;
         this.chart = chart;
         this.resultLines = resultLines;
@@ -19,6 +19,7 @@ export default class Module{
         this.matrix = matrix;
         this.container = container;
         this.addModuleInfo = addModuleInfo;
+        this.deleteModule = deleteModule;
         return this.draw(module)
     }
     drawNode() {
@@ -29,7 +30,7 @@ export default class Module{
 
         // 初始化模块位置
         group
-            .transform({
+            .matrix({
                 a: 1, b: 0, c: 0, d: 1, e: module.x , f: module.y,
             })
             .mousedown(e => {
@@ -37,8 +38,17 @@ export default class Module{
                 group.front();
                 // 阻止事件传递到container产生拖拽
                 e.stopPropagation();
-            });
-
+                // 隐藏右键菜单
+                this.chart.fire('menuHide');
+            })
+            .node.oncontextmenu = e => {
+                this.chart.fire('menuShow', e);
+                this.deleteModule.id = module.id;
+            };
+        // .native()
+        // .on('contextMenu', e => {
+        //     console.log(e)
+        // })
         // 记录拖拽相关位置信息
         const dragInfo = {
             draggable: false,
@@ -190,7 +200,7 @@ export default class Module{
                     const x = e.offsetX / this.matrix.a - dragInfo.clickX;
                     const y = e.offsetY / this.matrix.a - dragInfo.clickY;
                     requestAnimationFrame(() =>{
-                        group.transform({
+                        group.matrix({
                             a: 1, b: 0, c: 0, d: 1, e: x , f: y,
                         });
                         if(module.in.length) {
