@@ -59,7 +59,6 @@ export default class Module{
                         // filter: 'url(#f1)'
                     })
             })
-
             .node.oncontextmenu = e => {
                 this.chart.fire('menuShow', e);
                 this.deleteModule.id = module.id;

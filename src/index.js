@@ -183,9 +183,12 @@ class TChart {
                 .matrix(this.matrix);
             this.chart.fire('menuHide');
         });
+        const div = document.createElement('div');
+        let timer = null;
         function handleZoom(e) {
             e.preventDefault();
-            if(e.deltaY > 0 && this.matrix.a < 2) {
+            if(e.deltaY > 0 && this.matrix.a < 1.99) {
+                // 防止小数计算不准
                 this.matrix.a += 0.2;
                 this.matrix.d += 0.2;
                 this.container.fire('zoom')
@@ -195,7 +198,18 @@ class TChart {
                 this.matrix.d -= 0.2;
                 this.container.fire('zoom')
             }
+            div.innerText = Math.round(this.matrix.a * 100 )  + '%';
+            div.classList.add('active');
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                div.classList.remove('active')
+            }, 2000 )
         }
+        const addScaleTip = () => {
+            div.classList.add('tetris-scale-tip');
+            this.parent.appendChild(div)
+        };
+        addScaleTip();
         this.chart.node.addEventListener('wheel', handleZoom.bind(this))
     }
     // 画布拖拽
@@ -222,6 +236,8 @@ class TChart {
                 dragInfo.draggable = true;
                 dragInfo.originX = e.offsetX;
                 dragInfo.originY = e.offsetY;
+                // 左键按下后才能拖拽
+                if(e.which !== 1) return dragInfo.draggable = false;
                 this.chart
                     .mousemove(null)
                     .mouseup(null)
@@ -286,7 +302,6 @@ class TChart {
                         return;
                     }
                     startModule.out[startNodeIndex].push({ id, type: 'result'});
-                    console.log(this.addModuleInfo)
                     // 复制新增节点信息
                     const info = {};
                     for(let key in this.addModuleInfo) {
@@ -369,35 +384,32 @@ class TChart {
         };
         this.chart.on('menuHide', hideMenu);
         this.chart.click(hideMenu);
-        // 暂时删除功能写在这里
-        const handleDelete = e => {
-            // 隐藏右键菜单
-            this.chart.fire('menuHide');
-            const module = this.findModuleInModules(this.deleteModule.id);
-            //  删除连线
-            module.data.in.map( arr => arr.map(({id}) => this.deleteLine(id)));
-            module.data.out.map( arr => arr.map(({id, type}) => {
-                if(type === 'line') {
-                    this.deleteLine(id);
-                }else{
-                    this.deleteResultLine(id);
-                }
-            }));
-
-            // 删除节点
-            module.target.node.remove();
-            const index = this.findModuleIndexInModules(this.deleteModule.id);
-            if(index > -1) {
-                // 删除存储的数据
-                this.modules.splice(index, 1);
-            }
-            // 重绘结果点
-            this.updateResults()
-        };
-
-        document.querySelector('.tetris-svg-context-menu').addEventListener('click', handleDelete)
+        document.querySelector('.tetris-svg-context-menu').addEventListener('click', this.handleDeleteModule.bind(this))
     }
 
+    handleDeleteModule() {
+        this.chart.fire('menuHide');
+        const module = this.findModuleInModules(this.deleteModule.id);
+        //  删除连线
+        module.data.in.map( arr => arr.map(({id}) => this.deleteLine(id)));
+        module.data.out.map( arr => arr.map(({id, type}) => {
+            if(type === 'line') {
+                this.deleteLine(id);
+            }else{
+                this.deleteResultLine(id);
+            }
+        }));
+
+        // 删除节点
+        module.target.node.remove();
+        const index = this.findModuleIndexInModules(this.deleteModule.id);
+        if(index > -1) {
+            // 删除存储的数据
+            this.modules.splice(index, 1);
+        }
+        // 重绘结果点
+        this.updateResults()
+    }
 
     findModuleInModules(targetId) {
         return this.modules.find(({id}) => id === targetId)
