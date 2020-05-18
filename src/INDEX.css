@@ -35,7 +35,25 @@
 .tetris-svg-context-menu li>span{
     margin-right: 5px;
 }
-
+.tetris-scale-tip{
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    z-index: -1;
+    transform: translate(-50%, -50%);
+    padding: 5px 10px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 2px 2px rgba(0,0,0,0.2);
+    font-size: 28px;
+    background-color: #fff;
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}
+.tetris-scale-tip.active{
+    z-index: 1;
+    opacity: 1;
+}
 
 
 

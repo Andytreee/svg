@@ -184,6 +184,8 @@ class TChart {
             this.chart.fire('menuHide');
         });
         const div = document.createElement('div');
+        div.classList.add('tetris-scale-tip');
+        this.parent.appendChild(div);
         let timer = null;
         function handleZoom(e) {
             e.preventDefault();
@@ -205,11 +207,6 @@ class TChart {
                 div.classList.remove('active')
             }, 2000 )
         }
-        const addScaleTip = () => {
-            div.classList.add('tetris-scale-tip');
-            this.parent.appendChild(div)
-        };
-        addScaleTip();
         this.chart.node.addEventListener('wheel', handleZoom.bind(this))
     }
     // 画布拖拽
@@ -231,7 +228,6 @@ class TChart {
             });
         this
             .chart
-            .css('cursor', 'grab')
             .mousedown( e => {
                 dragInfo.draggable = true;
                 dragInfo.originX = e.offsetX;
@@ -239,6 +235,7 @@ class TChart {
                 // 左键按下后才能拖拽
                 if(e.which !== 1) return dragInfo.draggable = false;
                 this.chart
+                    .css('cursor', 'grab')
                     .mousemove(null)
                     .mouseup(null)
                     .mousemove(e => {
@@ -252,6 +249,8 @@ class TChart {
                     })
                     .mouseup( e => {
                         dragInfo.draggable = false;
+                        this.chart
+                            .css('cursor', 'default');
                         dragInfo.offsetX = this.matrix.e;
                         dragInfo.offsetY = this.matrix.f;
                     })
