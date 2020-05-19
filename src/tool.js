@@ -13,12 +13,19 @@ import running from './status/running.png';
 import failure from './status/failure.png';
 import success from './status/success.png';
 
-
-export const width  = 100;
-export const height = 86;
-export const textH  = 24;
+export const moduleInfo = {
+    width: 100,
+    height: 86,
+    textHeight: 24,
+    fontSize: 14,
+    d: 12,   // 模块小圆点直径
+    circleStyle: {
+        fill: '#000',
+        opacity: 0.4,
+    }
+};
 export const resultInfo = {
-    r: 20,
+    d: 20,
     marginTop: 50,
     marginRight: 20,
 };
@@ -414,11 +421,11 @@ export function transformData({ nodes, edges }, target) {
 
 export function generateLinePosition( directionType, { x, y, type, index}) {
     if(directionType === 'start') {
-        x = x + width;
-        y = y + (1+ index) * height/(modulesKV[type].outputNum + 1);
+        x = x + moduleInfo.width;
+        y = y + (1+ index) * moduleInfo.height/(modulesKV[type].outputNum + 1);
         return [x, y]
     }else{
-        y = y + (1+ index) * height/(modulesKV[type].inputNum + 1);
+        y = y + (1+ index) * moduleInfo.height/(modulesKV[type].inputNum + 1);
         return [x, y]
     }
 }
@@ -429,10 +436,6 @@ export function generateResultsAndResultLines(nodes, width) {
     const resultLines = [];
     let maxResultIndex = 0;
     for(const {id, endIndex, locationX: x, locationY: y, type} of rawData) {
-        // {
-        //     "nodeIndex": 0,
-        //     "resultIndex": 0
-        // }
         for(const { nodeIndex, resultIndex } of endIndex) {
             resultLines.push({
                 id: getRandomID(),
@@ -450,13 +453,8 @@ export function generateResultsAndResultLines(nodes, width) {
 }
 export function generateResultPosition(i, width) {
     if(!generateResultPosition.width) generateResultPosition.width = width;
-    return [ generateResultPosition.width - resultInfo.r/2 - resultInfo.marginRight, (i + 1) * resultInfo.marginTop ];
+    return [ generateResultPosition.width - resultInfo.d/2 - resultInfo.marginRight, (i + 1) * resultInfo.marginTop ];
 }
-
-export function generateModules(nodes) {
-
-}
-
 
 export function generatePoints({start, end}) {
     const data =  {

@@ -1,18 +1,27 @@
 import { G } from "@svgdotjs/svg.js";
-import '@svgdotjs/svg.filter.js';
+// import '@svgdotjs/svg.filter.js';
 import {
     generateLinePosition,
     generatePoints,
-    height,
-    width,
-    textH,
+    moduleInfo,
     modulesKV,
     status,
     generateResultPosition
 } from "./tool";
 
 export default class Module{
-    constructor(module, chart, container, lines, resultLines, tempLineG, matrix, addModuleInfo, parent,deleteModule) {
+    constructor(module,
+                {
+                    chart,
+                    container,
+                    lines,
+                    resultLines,
+                    tempLineG,
+                    matrix,
+                    addModuleInfo,
+                    deleteModule,
+                    hooks
+                }) {
         this.lines = lines;
         this.chart = chart;
         this.resultLines = resultLines;
@@ -21,10 +30,8 @@ export default class Module{
         this.container = container;
         this.addModuleInfo = addModuleInfo;
         this.deleteModule = deleteModule;
+        this.hooks = hooks;
         return this.draw(module)
-    }
-    drawNode() {
-
     }
     draw(module) {
         const group = new G();
@@ -57,12 +64,16 @@ export default class Module{
                     .css({
                         stroke: '#00a0e9',
                         // filter: 'url(#f1)'
-                    })
+                    });
+                // 点击模块钩子函数
+                if(this.hooks.onModuleClick) {
+                    this.hooks.onModuleClick()
+                }
             })
             .node.oncontextmenu = e => {
-                this.chart.fire('menuShow', e);
-                this.deleteModule.id = module.id;
-            };
+            this.chart.fire('menuShow', e);
+            this.deleteModule.id = module.id;
+        };
         // 记录拖拽相关位置信息
         const dragInfo = {
             draggable: false,
@@ -85,22 +96,16 @@ export default class Module{
 
         // 0 0 5px 5px rgba(0, 160, 233, 0.2)
         // 绘制模块小圆点
-        const r  = 12;    // 直径
         for(let i=0; i<module.inNum; i++) {
-            const span = height / (module.inNum + 1);
+            const span = moduleInfo.height / (module.inNum + 1);
             const position = {
-                x: -r/2,
-                y: (i + 1) * span - r/2
+                x: -moduleInfo.d/2,
+                y: (i + 1) * span - moduleInfo.d/2
             };
             group
-                .circle(r)
+                .circle(moduleInfo.d)
                 .css('cursor', 'pointer')
-                .attr({
-                    // stroke: '#589DF9',
-                    fill: '#000',
-                    opacity: 0.4,
-                    // lineWidth: 2
-                })
+                .attr(moduleInfo.circleStyle)
                 .move( position.x, position.y)
                 .mouseup(e => {
                     if(this.addModuleInfo.startNodeId) {
@@ -108,7 +113,7 @@ export default class Module{
                         e.stopPropagation();
                         this.addModuleInfo.endNodeId = module.id;
                         this.addModuleInfo.endNodeIndex = i;
-                        this.addModuleInfo.end = [position.x + module.x + r/2, position.y + module.y + r/2];
+                        this.addModuleInfo.end = [position.x + module.x + moduleInfo.d/2, position.y + module.y + moduleInfo.d/2];
                         this.addModuleInfo.type = 'line';
                         this.addModuleInfo.endModule = module;
                         this.tempLineG.clear();
@@ -119,18 +124,15 @@ export default class Module{
         }
 
         for(let i=0; i<module.outNum; i++) {
-            const span = height / (module.outNum + 1);
+            const span = moduleInfo.height / (module.outNum + 1);
             const position = {
-                x: width - r/2,
-                y: (i + 1) * span - r/2
+                x: moduleInfo.width - moduleInfo.d/2,
+                y: (i + 1) * span - moduleInfo.d/2
             };
             const circle = group
-                .circle(r)
+                .circle(moduleInfo.d)
                 .css('cursor', 'pointer')
-                .attr({
-                    fill: '#000',
-                    opacity: 0.4,
-                })
+                .attr(moduleInfo.circleStyle)
                 .move( position.x, position.y )
                 .mousedown(e => {
                     this.tempLineG.clear();
@@ -149,14 +151,14 @@ export default class Module{
                     ;
                     this.addModuleInfo.startNodeId = module.id;
                     this.addModuleInfo.startNodeIndex = i;
-                    this.addModuleInfo.start = [position.x + module.x + r/2, position.y + module.y + r/2];
+                    this.addModuleInfo.start = [position.x + module.x + moduleInfo.d/2, position.y + module.y + moduleInfo.d/2];
                     this.addModuleInfo.startModule = module;
                     this.chart
                         .css('cursor', 'default')
                         .mousemove(null)
                         .mouseup(null)
                         .mousemove( e => {
-                            this.handleTempLine([position.x + module.x + r/2, position.y + module.y + r/2], e)
+                            this.handleTempLine([position.x + module.x + moduleInfo.d/2, position.y + module.y + moduleInfo.d/2], e)
                         })
                         .mouseup( e => {
                             this.tempLineG.clear();
@@ -172,10 +174,10 @@ export default class Module{
             .css({
                 'user-select': 'none'
             })
-            .move( width/2, -textH)
+            .move( moduleInfo.width/2, -moduleInfo.textH)
             .font({
                 family:'Microsoft YaHei',
-                size: 14,
+                size: moduleInfo.fontSize,
                 anchor: 'middle',
             });
 
@@ -184,7 +186,7 @@ export default class Module{
             .image(modulesKV[module.type].img)
             .size(36, 36)
             .css('cursor', 'move')
-            .move(width/2 - 18, 10)
+            .move(moduleInfo.width/2 - 18, 10)
             .mousedown(e =>{
                 this.handleMove( e, module, group, dragInfo)
             });
@@ -194,7 +196,7 @@ export default class Module{
             .image(status[module.status || 0])
             .size(18, 18)
             .css('cursor', 'move')
-            .move(width/2 - 9, 56)
+            .move(moduleInfo.width/2 - 9, 56)
             .mousedown(e =>{
                 this.handleMove( e, module, group, dragInfo)
             });

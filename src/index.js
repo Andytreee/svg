@@ -1,6 +1,5 @@
-import { SVG, Rect, Path, G  } from '@svgdotjs/svg.js'
+import { SVG } from '@svgdotjs/svg.js'
 import {
-    generateLinePosition,
     generatePoints,
     getRandomID,
     generateResultPosition
@@ -8,7 +7,7 @@ import {
 import '@svgdotjs/svg.filter.js';
 import Module from './Module';
 import './index.css'
-
+import { resultInfo } from './tool';
 
 class TChart {
     constructor(target= '#app', data, options = {}) {
@@ -21,26 +20,15 @@ class TChart {
         this.resultsG = this.container.group().addClass('tetris-chart-results');
         this.tempLineG = this.container.group();
         this.parent = document.querySelector(target);
-        this.contextMenu = document.createElement('div');
-        this.contextMenu.classList.add('tetris-svg-context-menu');
-        this.contextMenu.innerHTML = `<ul>
-                    <li><span></span> 删除</li> 
-                </ul>`;
-        this.parent.appendChild(this.contextMenu);
         this.data = data;
         this.lines = [];
         this.modules = [];
         this.results = [];
         this.resultLines = [];
         // 要删除的连线
-        this.deleteLineInfo = {
-            type: '',
-            id: null
-        };
+        this.deleteLineInfo = {};
         // 要删除的模块id
-        this.deleteModule = {
-            id: null
-        };
+        this.deleteModule = {};
         // container 初始缩放 位置参数
         this.matrix = {
             a: 1,
@@ -52,43 +40,53 @@ class TChart {
         };
         // 保存新增连线节点信息
         this.addModuleInfo = {};
+        this.addContextMenu();
+        this.hooks = options.hooks || {};
         this.init(data);
         this.zoom();
         this.drag();
         this.handleAddLine();
-        this.hooks = options.hooks || {};
         this.onModuleContextMenu();
         this.onLineContextMenu();
-
     }
 
     init({lines, modules, results = 1, resultLines}) {
+        // 初始化 线、结果线、结果点、模块
         this.drawLines(lines);
         this.drawResultLines(resultLines);
         this.drawResults(results);
         this.drawModules(modules);
-        this.chart.defs().node.innerHTML =
-            `
-         <filter id="f1" x="-40%" y="-40%" width="180%" height="180%" filterUnits="userSpaceOnUse">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/> 
-      <feOffset dx="0" dy="0" result="offsetblur"/> 
-      <feOffset dx="0" dy="0" result="offsetblur"/>
-      <feMerge> 
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-`
     }
 
-    update() {
+    addContextMenu() {
+        this.contextMenu = document.createElement('div');
+        this.contextMenu.classList.add('tetris-svg-context-menu');
+        this.contextMenu.innerHTML = `
+                <ul>
+                    <li>删除</li> 
+                </ul>`;
+        this.parent.appendChild(this.contextMenu);
+    }
 
+    addFilter() {
+        // 选中后阴影效果
+        // 暂时未启用
+        this.chart.defs().node.innerHTML = `
+         <filter id="f1" x="-40%" y="-40%" width="180%" height="180%" filterUnits="userSpaceOnUse">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2"/> 
+              <feOffset dx="0" dy="0" result="offsetblur"/> 
+              <feOffset dx="0" dy="0" result="offsetblur"/>
+              <feMerge> 
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+        </filter>`
     }
 
     drawModules(modules) {
         modules.map( module => {
-            const group = new Module(module, this.chart, this.container, this.lines, this.resultLines, this.tempLineG, this.matrix, this.addModuleInfo, this.parent, this.deleteModule);
+            const group = new Module( module, this);
             group.addTo(this.modulesG);
             this.modules.push({
                 id: module.id,
@@ -144,7 +142,6 @@ class TChart {
     }
 
     drawResults(results) {
-        const r = 20;
         this.results = [];
         this.resultsG.clear();
         for(let i = 0; i<= results + 1; i++) {
@@ -152,8 +149,8 @@ class TChart {
                 id: i,
                 linked: this.resultLines.some( line => line.data.endNodeIndex === i),  // 判断是否连接
                 target: this.resultsG
-                    .circle(r)
-                    .move(this.parent.clientWidth - r - 20, (i + 1) * 50 - 10)
+                    .circle(resultInfo.d)
+                    .move(this.parent.clientWidth - resultInfo.d - resultInfo.marginRight, (i + 1) * resultInfo.marginTop -  resultInfo.d /2)
                     .attr({
                         stroke: '#589DF9',
                         fill: '#ffffff',
@@ -161,6 +158,7 @@ class TChart {
                     })
                     .css('cursor', 'pointer')
                     .mouseup( e => {
+                        // 处理结果线逻辑
                         if(this.addModuleInfo.startNodeId) {
                             // 防止触发 chart mouseup事件 清除addModuleInfo 数据
                             e.stopPropagation();
@@ -183,6 +181,7 @@ class TChart {
                 .matrix(this.matrix);
             this.chart.fire('menuHide');
         });
+        // 显示当前缩放比例的 tip
         const div = document.createElement('div');
         div.classList.add('tetris-scale-tip');
         this.parent.appendChild(div);
@@ -266,10 +265,10 @@ class TChart {
                 })
                 if(this.addModuleInfo.type === 'line') {
                     // 节点连线 todo：连线前钩子函数
-                    // if(beforeAddLine) {
-                    //
-                    // }
-                    const id = getRandomID();
+                    let id = getRandomID();
+                    if(this.hooks.onAddLine) {
+                        id = await this.hooks.onAddLine()
+                    }
                     this.addModuleInfo.id = id;
                     const {
                         startModule,
@@ -285,6 +284,9 @@ class TChart {
                     startModule.out[startNodeIndex].push({ id, type: 'line'});
                     this.drawLine(this.addModuleInfo);
                 }else if(this.addModuleInfo.type === 'resultLine') {
+                    if(this.hooks.onAddResultLine) {
+                         await this.hooks.onAddResultLine()
+                    }
                     const id = getRandomID();
                     this.addModuleInfo.id = id;
                     const {
@@ -322,12 +324,19 @@ class TChart {
     }
 
     onLineContextMenu() {
+        // 右键删除连线
         this
             .chart
-            .on('deleteLine', e => {
+            .on('deleteLine', async e => {
                 if(this.deleteLineInfo.type === 'line') {
+                    if(this.hooks.onDeleteLine) {
+                        await this.hooks.onDeleteLine()
+                    }
                     this.deleteLine(this.deleteLineInfo.id)
                 }else if(this.deleteLineInfo.type === 'result') {
+                    if(this.hooks.onDeleteResultLine) {
+                        await this.hooks.onDeleteResultLine()
+                    }
                     this.deleteResultLine(this.deleteLineInfo.id)
                 }
                 this.updateResults();
@@ -352,11 +361,7 @@ class TChart {
     deleteResultLine(id) {
         try{
             // 删除dom节点
-            // console.log(id, this.findLineInResultLines(id));
             const resultLine = this.findLineInResultLines(id);
-            console.log({
-                resultLine
-            })
             if(resultLine) resultLine.target.node.remove();
             const index = this.findLineIndexInResultLines(id);
             if(index > -1) {
@@ -386,7 +391,10 @@ class TChart {
         document.querySelector('.tetris-svg-context-menu').addEventListener('click', this.handleDeleteModule.bind(this))
     }
 
-    handleDeleteModule() {
+    async handleDeleteModule() {
+        if(this.hooks.onDeleteModule) {
+            await this.hooks.onDeleteModule(this.deleteModule.id)
+        }
         this.chart.fire('menuHide');
         const module = this.findModuleInModules(this.deleteModule.id);
         //  删除连线
@@ -398,7 +406,6 @@ class TChart {
                 this.deleteResultLine(id);
             }
         }));
-
         // 删除节点
         module.target.node.remove();
         const index = this.findModuleIndexInModules(this.deleteModule.id);
