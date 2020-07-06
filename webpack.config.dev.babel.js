@@ -14,7 +14,7 @@ export default webpackMerge(baseConfig, {
     ],
     devServer: {
         host: '0.0.0.0',
-        port: '8081',
+        port: '8000',
         inline: true,
         compress: true,
         disableHostCheck: true,

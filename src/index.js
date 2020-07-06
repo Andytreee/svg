@@ -2,7 +2,8 @@ import { SVG } from '@svgdotjs/svg.js'
 import {
     generatePoints,
     getRandomID,
-    generateResultPosition
+    generateResultPosition,
+    transMatrix2Viewbox
 } from './tool';
 import '@svgdotjs/svg.filter.js';
 import Module from './Module';
@@ -11,7 +12,8 @@ import { resultInfo } from './tool';
 
 class TChart {
     constructor(target= '#app', data, options = {}) {
-        this.chart = SVG().addTo(target).size('100%', '100%');
+        this.parentDom = document.querySelector('#app');
+        this.chart = SVG().addTo(target).size('100%', '100%').viewbox(0,0,this.parentDom.clientWidth,this.parentDom.clientHeight);
         this.chart.node.oncontextmenu = e => e.preventDefault();   // 阻止浏览器默认菜单
         this.container = this.chart.group().addClass( 'tetris-chart-container');
         this.modulesG = this.container.group().addClass('tetris-chart-modules');
@@ -63,7 +65,7 @@ class TChart {
         this.contextMenu.classList.add('tetris-svg-context-menu');
         this.contextMenu.innerHTML = `
                 <ul>
-                    <li>删除</li> 
+                    <li>删除</li>
                 </ul>`;
         this.parent.appendChild(this.contextMenu);
     }
@@ -73,10 +75,10 @@ class TChart {
         // 暂时未启用
         this.chart.defs().node.innerHTML = `
          <filter id="f1" x="-40%" y="-40%" width="180%" height="180%" filterUnits="userSpaceOnUse">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="2"/> 
-              <feOffset dx="0" dy="0" result="offsetblur"/> 
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
               <feOffset dx="0" dy="0" result="offsetblur"/>
-              <feMerge> 
+              <feOffset dx="0" dy="0" result="offsetblur"/>
+              <feMerge>
                 <feMergeNode/>
                 <feMergeNode in="SourceGraphic"/>
                 <feMergeNode in="SourceGraphic"/>
@@ -177,8 +179,12 @@ class TChart {
     // 画布缩放
     zoom() {
         this.container.on('zoom', e=> {
-            this.container
-                .matrix(this.matrix);
+            // this.container
+            //     .matrix(this.matrix);
+            const { clientWidth, clientHeight } = this.parentDom;
+            const viewbox = transMatrix2Viewbox(this.matrix, clientWidth, clientHeight)
+            // console.log({ clientWidth, clientHeight, viewbox, matrix: this.matrix })
+            this.chart.viewbox(viewbox);
             this.chart.fire('menuHide');
         });
         // 显示当前缩放比例的 tip
@@ -221,8 +227,14 @@ class TChart {
         this
             .container
             .on('translate', e=> {
-                this.container
-                    .matrix(this.matrix);
+                // this.container
+                //     .matrix(this.matrix);
+                // console.log(this.matrix)
+                
+                const { clientWidth, clientHeight } = this.parentDom;
+                const viewbox = transMatrix2Viewbox(this.matrix, clientWidth, clientHeight)
+                // console.log({ clientWidth, clientHeight, viewbox, matrix: this.matrix })
+                this.chart.viewbox(viewbox);
                 this.chart.fire('menuHide');
             });
         this
