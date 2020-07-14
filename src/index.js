@@ -348,6 +348,7 @@ class TChart {
             // 删除dom节点
             const line = this.findLineInLines(id);
             if(line) line.target.node.remove();
+
             const index = this.findLineIndexInLines(id);
             if(index > -1) {
                 // 删除存储的数据
@@ -363,6 +364,7 @@ class TChart {
             // 删除dom节点
             const resultLine = this.findLineInResultLines(id);
             if(resultLine) resultLine.target.node.remove();
+            console.log({resultLine})
             const index = this.findLineIndexInResultLines(id);
             if(index > -1) {
                 // 删除存储的数据

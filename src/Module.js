@@ -113,7 +113,8 @@ export default class Module{
                         e.stopPropagation();
                         this.addModuleInfo.endNodeId = module.id;
                         this.addModuleInfo.endNodeIndex = i;
-                        this.addModuleInfo.end = [position.x + module.x + moduleInfo.d/2, position.y + module.y + moduleInfo.d/2];
+                        const { translateX, translateY } = group.transform();
+                        this.addModuleInfo.end = [position.x + translateX + moduleInfo.d / 2, position.y + translateY + moduleInfo.d / 2];
                         this.addModuleInfo.type = 'line';
                         this.addModuleInfo.endModule = module;
                         this.tempLineG.clear();
@@ -157,8 +158,9 @@ export default class Module{
                         .css('cursor', 'default')
                         .mousemove(null)
                         .mouseup(null)
-                        .mousemove( e => {
-                            this.handleTempLine([position.x + module.x + moduleInfo.d/2, position.y + module.y + moduleInfo.d/2], e)
+                        .mousemove(e => {
+                            const { translateX, translateY } = group.transform();
+                            this.handleTempLine([position.x + translateX + moduleInfo.d / 2, position.y + translateY + moduleInfo.d / 2], e);
                         })
                         .mouseup( e => {
                             this.tempLineG.clear();
@@ -274,13 +276,15 @@ export default class Module{
             })
     }
 
-    handleTempLine(start, e) {
+    handleTempLine (start, e) {
         const target = this
             .tempLineG
             .children()[0];
+        // 根据start、end 的x坐标大小，减去 1px 以触发结果点mouseup事件
+        const addon = start[0] - (e.offsetX - this.matrix.e) > 0 ? 1 : -1;
         target && target.plot(generatePoints({
             start: start,
-            end: [e.offsetX -this.matrix.e - 1, e.offsetY - this.matrix.f].map( v => v/this.matrix.a)
+            end: [e.offsetX - this.matrix.e + addon, e.offsetY - this.matrix.f].map(v => v / this.matrix.a)
         }));
     }
 }
