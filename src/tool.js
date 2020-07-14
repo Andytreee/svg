@@ -475,3 +475,9 @@ export function generatePoints({start, end}) {
 export function generateArray(item, length ) {
     return Array.from({length}).map(() => JSON.parse(JSON.stringify(item)));
 }
+
+
+export function transMatrix2Viewbox(matrix, width, height) {
+    const { a, d, e, f } = matrix;
+    return [ -e, -f, a*width, d*height]
+}
