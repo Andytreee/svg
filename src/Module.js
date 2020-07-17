@@ -78,14 +78,38 @@ export default class Module{
         const dragInfo = {
             draggable: false,
         };
-        // 绘制模块框体并定义拖拽事件
+
+        // 绘制模块框体
+        group
+            .rect(100, 86)
+            .radius(10)
+            .css({
+                fill: '#e1efff',
+                opacity: 0.7,
+                stroke: 'transparent',
+                lineWidth: 2
+            })
+
+        // 模块图片
+        group
+            .image(modulesKV[module.type].img)
+            .size(36, 36)
+            .move(moduleInfo.width/2 - 18, 10)
+
+        // 模块运行状态图片
+        group
+            .image(status[module.status || 0])
+            .size(18, 18)
+            .move(moduleInfo.width/2 - 9, 56)
+
+        // 透明事件层
         group
             .rect(100, 86)
             .radius(10)
             .css({
                 cursor: 'move',
-                fill: '#e1efff',
-                opacity: 0.7,
+                fill: 'transparent',
+                opacity: 1,
                 stroke: 'transparent',
                 lineWidth: 2
             })
@@ -181,25 +205,8 @@ export default class Module{
                 anchor: 'middle',
             });
 
-        // 模块图片
-        group
-            .image(modulesKV[module.type].img)
-            .size(36, 36)
-            .css('cursor', 'move')
-            .move(moduleInfo.width/2 - 18, 10)
-            .mousedown(e =>{
-                this.handleMove( e, module, group, dragInfo)
-            });
 
-        // 模块运行状态图片
-        group
-            .image(status[module.status || 0])
-            .size(18, 18)
-            .css('cursor', 'move')
-            .move(moduleInfo.width/2 - 9, 56)
-            .mousedown(e =>{
-                this.handleMove( e, module, group, dragInfo)
-            });
+
 
         return group
     }
@@ -278,9 +285,11 @@ export default class Module{
         const target = this
             .tempLineG
             .children()[0];
+        // 根据start、end 的x坐标大小，减去 1px 以触发结果点mouseup事件
+        const addon = start[0] - (e.offsetX - this.matrix.e) > 0 ? 1 : -1;
         target && target.plot(generatePoints({
             start: start,
-            end: [e.offsetX -this.matrix.e - 1, e.offsetY - this.matrix.f].map( v => v/this.matrix.a)
+            end: [e.offsetX - this.matrix.e + addon, e.offsetY - this.matrix.f].map(v => v / this.matrix.a)
         }));
     }
 }
