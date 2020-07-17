@@ -177,8 +177,11 @@ class TChart {
     // 画布缩放
     zoom() {
         this.container.on('zoom', e=> {
+            const { x, y } = e.detail;
+            const { translateX, translateY  } = this.container.transform();
             this.container
-                .matrix(this.matrix);
+                .attr('transform-origin', `${ x - translateX } ${ y - translateY }`)
+                .matrix(this.matrix)
             this.chart.fire('menuHide');
         });
         // 显示当前缩放比例的 tip
@@ -187,17 +190,18 @@ class TChart {
         this.parent.appendChild(div);
         let timer = null;
         function handleZoom(e) {
+            const { clientX, clientY } = e;
             e.preventDefault();
-            if(e.deltaY > 0 && this.matrix.a < 1.99) {
+            if(e.deltaY > 0 && this.matrix.a > 0.5) {
                 // 防止小数计算不准
-                this.matrix.a += 0.2;
-                this.matrix.d += 0.2;
-                this.container.fire('zoom')
+                this.matrix.a -= 0.25;
+                this.matrix.d -= 0.25;
+                this.container.fire('zoom', { x: clientX, y: clientY })
             }
-            if(e.deltaY < 0 && this.matrix.a > 0.6) {
-                this.matrix.a -= 0.2;
-                this.matrix.d -= 0.2;
-                this.container.fire('zoom')
+            if(e.deltaY < 0 && this.matrix.a < 2) {
+                this.matrix.a += 0.25;
+                this.matrix.d += 0.25;
+                this.container.fire('zoom', { x: clientX, y: clientY })
             }
             div.innerText = Math.round(this.matrix.a * 100 )  + '%';
             div.classList.add('active');

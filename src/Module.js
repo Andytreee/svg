@@ -137,7 +137,8 @@ export default class Module{
                         e.stopPropagation();
                         this.addModuleInfo.endNodeId = module.id;
                         this.addModuleInfo.endNodeIndex = i;
-                        this.addModuleInfo.end = [position.x + module.x + moduleInfo.d/2, position.y + module.y + moduleInfo.d/2];
+                        const { translateX, translateY } = group.transform();
+                        this.addModuleInfo.end = [position.x + translateX + moduleInfo.d/2, position.y + translateY + moduleInfo.d/2];
                         this.addModuleInfo.type = 'line';
                         this.addModuleInfo.endModule = module;
                         this.tempLineG.clear();
@@ -175,14 +176,16 @@ export default class Module{
                     ;
                     this.addModuleInfo.startNodeId = module.id;
                     this.addModuleInfo.startNodeIndex = i;
-                    this.addModuleInfo.start = [position.x + module.x + moduleInfo.d/2, position.y + module.y + moduleInfo.d/2];
+                    const { translateX, translateY } = group.transform();
+                    this.addModuleInfo.start = [position.x + translateX + moduleInfo.d/2, position.y + translateY + moduleInfo.d/2];
                     this.addModuleInfo.startModule = module;
                     this.chart
                         .css('cursor', 'default')
                         .mousemove(null)
                         .mouseup(null)
                         .mousemove( e => {
-                            this.handleTempLine([position.x + module.x + moduleInfo.d/2, position.y + module.y + moduleInfo.d/2], e)
+                            const { translateX, translateY } = group.transform();
+                            this.handleTempLine([position.x + translateX + moduleInfo.d/2, position.y + translateY + moduleInfo.d/2], e)
                         })
                         .mouseup( e => {
                             this.tempLineG.clear();
