@@ -242,7 +242,10 @@ export default class Module{
                                             type: module.type,
                                             index:  line.data.endNodeIndex,
                                         });
-                                        line.target.plot(generatePoints(line.data))
+                                        line.target.each( (i, child) => {
+                                            child
+                                                .plot(generatePoints(line.data))
+                                        })
                                     })
                             })
                         }
@@ -257,7 +260,10 @@ export default class Module{
                                             type: module.type,
                                             index:  line.data.startNodeIndex,
                                         });
-                                        line.target.plot(generatePoints(line.data))
+                                        line.target.each( (i, child) => {
+                                            child
+                                                .plot(generatePoints(line.data))
+                                        })
                                     })
                             });
                             module.out.map( outs => {
@@ -271,7 +277,10 @@ export default class Module{
                                             index:  line.data.startNodeIndex,
                                         });
                                         line.data.end = generateResultPosition(line.data.endNodeIndex);
-                                        line.target.plot(generatePoints(line.data))
+                                        line.target.each( (i, child) => {
+                                            child
+                                                .plot(generatePoints(line.data))
+                                        })
                                     })
                             });
                         }

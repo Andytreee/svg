@@ -122,8 +122,9 @@ class TChart {
     }
 
     generateLine(g, line, type = 'line') {
-        // 线样式
-        const target  = g
+        const lineG = g.group();
+        // 线样式 展示层
+       lineG
             .path(generatePoints(line))
             .stroke({
                 color: '#999',
@@ -132,14 +133,24 @@ class TChart {
                 linejoin: 'round'
             })
             .fill('none')
+        // 透明事件层
+       const eventTarget = lineG
+            .path(generatePoints(line))
+            .stroke({
+                color: 'transparent',
+                width: 4,
+                linecap: 'round',
+                linejoin: 'round'
+            })
+            .fill('none')
             .css('cursor', 'pointer');
         // contextmenu事件
-        target.node.oncontextmenu = e => {
+        eventTarget.node.oncontextmenu = e => {
             this.deleteLineInfo.id = line.id;
             this.deleteLineInfo.type = type;
             this.chart.fire('deleteLine');
         };
-        return target
+        return lineG
     }
 
     drawResults(results) {
