@@ -114,6 +114,8 @@ export default class Module{
                 lineWidth: 2
             })
             .mousedown(e =>{
+                // 左键按下后才能拖拽
+                if(e.which !== 1) return;
                 // 定义模块拖拽事件
                 this.handleMove( e, module, group, dragInfo);
             });
@@ -201,15 +203,12 @@ export default class Module{
             .css({
                 'user-select': 'none'
             })
-            .move( moduleInfo.width/2, -moduleInfo.textH)
+            .move( moduleInfo.width/2, -moduleInfo.textHeight)
             .font({
                 family:'Microsoft YaHei',
                 size: moduleInfo.fontSize,
                 anchor: 'middle',
             });
-
-
-
 
         return group
     }

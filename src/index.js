@@ -48,6 +48,7 @@ class TChart {
         this.handleAddLine();
         this.onModuleContextMenu();
         this.onLineContextMenu();
+        this.prev = {}
     }
 
     init({lines, modules, results = 1, resultLines}) {
@@ -178,10 +179,30 @@ class TChart {
     zoom() {
         this.container.on('zoom', e=> {
             const { x, y } = e.detail;
-            const { translateX, translateY  } = this.container.transform();
+            const { scaleX, scaleY, translateX, translateY  } = this.container.transform();
+            let dx = 0,dy =0
+            if(this.prev.x !== undefined) {
+                // 修正不同位置缩放造成的位置偏差
+                 dx = (x- this.prev.x) * ( (1 -  scaleX) / scaleX);
+                 dy = (y- this.prev.y) * ( (1 -  scaleY) / scaleY);
+            }
+            this.prev = {
+                x,
+                y,
+                translateX,
+                translateY,
+                scaleX,
+                scaleY,
+                dx,
+                dy
+            }
             this.container
-                .attr('transform-origin', `${ x - translateX } ${ y - translateY }`)
-                .matrix(this.matrix)
+                .attr('transform-origin', `${ x  - translateX  + dx } ${ y - translateY  + dy}`)
+                .matrix({
+                    ...this.matrix,
+                    e: this.matrix.e - dx,
+                    f: this.matrix.f - dy
+                })
             this.chart.fire('menuHide');
         });
         // 显示当前缩放比例的 tip
@@ -190,18 +211,17 @@ class TChart {
         this.parent.appendChild(div);
         let timer = null;
         function handleZoom(e) {
-            const { clientX, clientY } = e;
+            const { offsetX, offsetY } = e;
             e.preventDefault();
             if(e.deltaY > 0 && this.matrix.a > 0.5) {
-                // 防止小数计算不准
                 this.matrix.a -= 0.25;
                 this.matrix.d -= 0.25;
-                this.container.fire('zoom', { x: clientX, y: clientY })
+                this.container.fire('zoom', { x: offsetX, y: offsetY })
             }
             if(e.deltaY < 0 && this.matrix.a < 2) {
                 this.matrix.a += 0.25;
                 this.matrix.d += 0.25;
-                this.container.fire('zoom', { x: clientX, y: clientY })
+                this.container.fire('zoom', { x: offsetX, y: offsetY })
             }
             div.innerText = Math.round(this.matrix.a * 100 )  + '%';
             div.classList.add('active');
@@ -289,7 +309,7 @@ class TChart {
                     this.drawLine(this.addModuleInfo);
                 }else if(this.addModuleInfo.type === 'resultLine') {
                     if(this.hooks.onAddResultLine) {
-                         await this.hooks.onAddResultLine()
+                        await this.hooks.onAddResultLine()
                     }
                     const id = getRandomID();
                     this.addModuleInfo.id = id;
