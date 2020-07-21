@@ -10,7 +10,7 @@ import './index.css'
 import { resultInfo } from './tool';
 
 class TChart {
-    constructor(target= '#app', data, options = {}) {
+    constructor(target= '#app', { data,  options = {}}) {
         this.chart = SVG().addTo(target).size('100%', '100%');
         this.chart.node.oncontextmenu = e => e.preventDefault();   // 阻止浏览器默认菜单
         this.container = this.chart.group().addClass( 'tetris-chart-container');
