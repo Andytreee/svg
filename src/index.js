@@ -284,9 +284,6 @@ class TChart {
         this
             .chart
             .on('addLine', async e => {
-                console.log({
-                    info: this.addModuleInfo
-                })
                 if(this.addModuleInfo.type === 'line') {
                     // 节点连线 todo：连线前钩子函数
                     let id = getRandomID();
