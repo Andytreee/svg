@@ -5,991 +5,270 @@ import {
 
 
 const data = {
-    "nodes": [{
-        "id": 2103,
-        "processId": 145,
-        "type": 12,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "hasHeader": true,
-                "fileName": "",
-                "hdfsPath": "group1/M00/00/F1/ChQKKV6FQNaAQaNgAAAMBKJhblc629.csv",
-                "separator": ","
-            }
+    "nodes": [
+        {
+            "id": 2103,
+            "type": 12,
+            "name": null,
+            "status": 2,
+            "x": 370.0,
+            "y": 129.4667,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 370.0,
-        "locationY": 129.4667,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2105,
-        "processId": 145,
-        "type": 61,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": null,
-            "config": {
-                "selectFields": ["sepal_length__cm_", "petal_length__cm_", "sepal_width__cm_"],
-                "preNodeId": 2103,
-                "bins": 10,
-                "y": "label",
-                "preNodeIndex": 0,
-                "chart": ["histogram", "box_plot", "broken_line", "scatter_diagram", "matrix", "matrix", "scatter_diagram", "broken_line", "box_plot", "histogram"],
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FQN6AOHUTAAAMBPk27hw527.csv",
-                "fitted": "1"
-            }
+        {
+            "id": 2105,
+            "type": 61,
+            "name": null,
+            "status": 2,
+            "x": 648.0,
+            "y": 99.4667,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 648.0,
-        "locationY": 99.4667,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2118,
-        "processId": 145,
-        "type": 41,
-        "name": null,
-        "isLocal": "1",
-        "property": null,
-        "latestOutput": null,
-        "status": -1,
-        "locationX": 18.95,
-        "locationY": -610.35,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2119,
-        "processId": 145,
-        "type": 45,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }],
-                "1": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "prediction",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "C": 1,
-                "decisionFunctionShapeAuto": "0",
-                "degreeAuto": "0",
-                "nodeTestId": 2120,
-                "tol": 0.001,
-                "maxIterStep": 0,
-                "decisionFunctionShape": "ovr",
-                "maxIter": -1,
-                "classWeightAuto": "0",
-                "kernelAuto": "0",
-                "CAuto": "0",
-                "maxIterAuto": "0",
-                "kernel": "rbf",
-                "degreeStep": 0,
-                "degree": 3,
-                "autoBol": "1",
-                "randomState": 1,
-                "label": "label",
-                "tolStep": 0,
-                "decisionFunctionShapeList": ["ovr"],
-                "kernelList": ["rbf"],
-                "gammaAuto": "0",
-                "tolAuto": "0",
-                "preNodeId": 2120,
-                "CStep": 0,
-                "strategy": "rs",
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FSmCAegyxAAAIgOBnCcU312.csv",
-                "gamma": "auto",
-                "trainmodelpath": "group1/M00/00/F1/ChQKKV6FSmyAOh4DAAAKhypvdVY0695168"
-            }
+        {
+            "id": 2118,
+            "type": 41,
+            "name": null,
+            "status": -1,
+            "x": 18.95,
+            "y": -610.35,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 851.0,
-        "locationY": 221.4667,
-        "isEnd": 1,
-        "endIndex": [{
-            "nodeIndex": 0,
-            "resultIndex": 0
-        }]
-    }, {
-        "id": 2120,
-        "processId": 145,
-        "type": 31,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }],
-                "1": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "preNodeId": 2103,
-                "testSize": 0.3,
-                "randomState": 1,
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FQN6AOHUTAAAMBPk27hw527.csv",
-                "preNodeTableMeta": {
-                    "0": [{
-                        "fieldName": "sepal_length__cm_",
-                        "valueType": "float"
-                    }, {
-                        "fieldName": "label",
-                        "valueType": "float"
-                    }, {
-                        "fieldName": "petal_length__cm_",
-                        "valueType": "float"
-                    }, {
-                        "fieldName": "sepal_width__cm_",
-                        "valueType": "float"
-                    }, {
-                        "fieldName": "petal_width__cm_",
-                        "valueType": "float"
-                    }]
-                }
-            }
+        {
+            "id": 2119,
+            "type": 45,
+            "name": null,
+            "status": 2,
+            "x": 851.0,
+            "y": 221.4667,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 552.0,
-        "locationY": 266.4667,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2122,
-        "processId": 145,
-        "type": 33,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "selectFieldsMeta": [{
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "key": "label"
-                }],
-                "preNodeId": 2120,
-                "preNodeIndex": 1,
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FSmCAegyxAAAIgOBnCcU312.csv"
-            }
+        {
+            "id": 2120,
+            "type": 31,
+            "name": null,
+            "status": 2,
+            "x": 552.0,
+            "y": 266.4667,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 843.0,
-        "locationY": 70.4667,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2123,
-        "processId": 145,
-        "type": 33,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "prediction",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "selectFieldsMeta": [{
-                    "fieldName": "prediction",
-                    "valueType": "float",
-                    "key": "prediction"
-                }],
-                "preNodeId": 2119,
-                "preNodeIndex": 1,
-                "preOutHdfs": "group1/M00/00/F1/ChQKKV6FSoOAYt8eAAAKL2AmNWU049.csv"
-            }
+        {
+            "id": 2122,
+            "type": 33,
+            "name": null,
+            "status": 2,
+            "x": 843.0,
+            "y": 70.4667,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 1037.0,
-        "locationY": 122.0,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2155,
-        "processId": 145,
-        "type": 46,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }],
-                "1": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "prediction",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "minSamplesLeaf": 1,
-                "maxFeatureAuto": "0",
-                "nodeTestId": 2120,
-                "maxDepthAuto": "0",
-                "nEstimatorsAuto": "0",
-                "nEstimators": 50,
-                "minSamplesLeafStep": 0,
-                "learningRateAuto": "0",
-                "subsampleAuto": "0",
-                "maxDepthStep": 0,
-                "nEstimatorsStep": 0,
-                "autoBol": "1",
-                "maxFeature": "auto",
-                "randomState": 1,
-                "label": "label",
-                "learningRate": 0.1,
-                "minSamplesLeafAuto": "0",
-                "maxDepth": 3,
-                "preNodeId": 2120,
-                "learningRateStep": 0,
-                "subsampleStep": 0,
-                "maxFeatureList": ["auto"],
-                "subsample": 1,
-                "strategy": "rs",
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FSmCAegyxAAAIgOBnCcU312.csv",
-                "trainmodelpath": "group1/M00/00/FF/ChQKKV6G_TqAQuWhAAKdEWhDnGQ9405050"
-            }
+        {
+            "id": 2123,
+            "type": 33,
+            "name": null,
+            "status": 2,
+            "x": 1037.0,
+            "y": 122.0,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 791.0,
-        "locationY": 629.0,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2162,
-        "processId": 145,
-        "type": 48,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }],
-                "1": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "prediction",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "boosterList": ["gbtree"],
-                "regAlphaList": [0],
-                "regLambdaAuto": "0",
-                "colsampleBytreeAuto": "0",
-                "nodeTestId": 2120,
-                "objectiveList": ["multi:softprob"],
-                "booster": "gbtree",
-                "regAlpha": 0,
-                "maxDepthAuto": "0",
-                "objective": "multi:softprob",
-                "regAlphaAuto": "0",
-                "nEstimatorsAuto": "0",
-                "nEstimators": 100,
-                "boosterAuto": "0",
-                "regLambda": 1,
-                "learningRateAuto": "0",
-                "subsampleAuto": "0",
-                "learningRateList": [0.1],
-                "regLambdaList": [1],
-                "autoBol": "1",
-                "randomState": 1,
-                "label": "label",
-                "learningRate": 0.1,
-                "maxDepth": 6,
-                "preNodeId": 2120,
-                "colsampleBytreeList": [1],
-                "subsampleList": [1],
-                "colsampleBytree": 1,
-                "nEstimatorsList": [100],
-                "subsample": 1,
-                "maxDepthList": [6],
-                "strategy": "rs",
-                "objectiveAuto": "0",
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FSmCAegyxAAAIgOBnCcU312.csv",
-                "trainmodelpath": "group1/M00/00/FC/ChQKKV6G3gOASmCzAAFQaQJBy7U2186511"
-            }
+        {
+            "id": 2155,
+            "type": 46,
+            "name": null,
+            "status": 2,
+            "x": 791.0,
+            "y": 629.0,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 829.0,
-        "locationY": 787.0,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2215,
-        "processId": 145,
-        "type": 401,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }],
-                "1": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "prediction",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "minSamplesLeaf": 1,
-                "criterion": "gini",
-                "minSamplesLeafMax": 1,
-                "splitterList": ["best"],
-                "nodeTestId": 2120,
-                "maxFeatures": "auto",
-                "maxDepthAuto": "0",
-                "maxFeaturesAuto": "0",
-                "minSamplesLeafStep": 0,
-                "splitterAuto": "0",
-                "criterionAuto": "0",
-                "maxDepthStep": 0,
-                "autoBol": "1",
-                "randomState": 1,
-                "label": "label",
-                "minSamplesSplitStep": 0,
-                "splitter": "best",
-                "minSamplesSplitAuto": "0",
-                "minSamplesLeafAuto": "0",
-                "maxDepth": 3,
-                "preNodeId": 2120,
-                "criterionList": ["gini"],
-                "maxFeaturesList": ["auto"],
-                "minSamplesLeafListList": [1],
-                "maxDepthMax": 3,
-                "strategy": "rs",
-                "minSamplesSplit": 0.1,
-                "minSamplesSplitMax": 1,
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FSmCAegyxAAAIgOBnCcU312.csv",
-                "trainmodelpath": "group1/M00/03/0E/ChQUAV6Fdv-AO8VbAAAHk-qQQWw2705513"
-            }
+        {
+            "id": 2162,
+            "type": 48,
+            "name": null,
+            "status": 2,
+            "x": 829.0,
+            "y": 787.0,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 1043.0,
-        "locationY": 616.0,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2216,
-        "processId": 145,
-        "type": 44,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }],
-                "1": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "prediction",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "pList": [2],
-                "autoBol": "1",
-                "label": "label",
-                "nNeighbors": 5,
-                "nNeighborsList": [5],
-                "algorithmAuto": "0",
-                "nodeTestId": 2120,
-                "p": 2,
-                "preNodeId": 2120,
-                "pAuto": "0",
-                "algorithmList": ["auto"],
-                "nNeighborsAuto": "0",
-                "strategy": "rs",
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FSmCAegyxAAAIgOBnCcU312.csv",
-                "trainmodelpath": "group1/M00/03/1A/ChQUAV6G_Q-AM1xNAAAT_xsPq040705594",
-                "algorithm": "auto"
-            }
+        {
+            "id": 2215,
+            "type": 401,
+            "name": null,
+            "status": 2,
+            "x": 1043.0,
+            "y": 616.0,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 1264.0,
-        "locationY": 499.0,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2223,
-        "processId": 145,
-        "type": 41,
-        "name": null,
-        "isLocal": "1",
-        "property": null,
-        "latestOutput": null,
-        "status": -1,
-        "locationX": -45.0417,
-        "locationY": -403.7084,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2225,
-        "processId": 145,
-        "type": 41,
-        "name": null,
-        "isLocal": "1",
-        "property": null,
-        "latestOutput": null,
-        "status": -1,
-        "locationX": 541.0,
-        "locationY": 506.0,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2274,
-        "processId": 145,
-        "type": 43,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "1": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "prediction",
-                    "valueType": "float",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "preNodeId": 2120,
-                "maxIter": 20,
-                "randomState": 1,
-                "label": "label",
-                "activation": "tanh",
-                "preOutHdfs": "group1/M00/03/0C/ChQUAV6FSmCAegyxAAAIgOBnCcU312.csv",
-                "nodeTestId": 2120,
-                "n": [2, 2],
-                "trainmodelpath": "group1/M00/00/F5/ChQKKV6Fm0mADINpAAAZcRc1v0U4508466"
-            }
+        {
+            "id": 2216,
+            "type": 44,
+            "name": null,
+            "status": 2,
+            "x": 1264.0,
+            "y": 499.0,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 601.0,
-        "locationY": 723.0,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 2563,
-        "processId": 145,
-        "type": 73,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": null,
-            "config": {
-                "yTrueIndex": 0,
-                "yTrue": 2123,
-                "yPredict": 2122,
-                "yPredictOutHdfs": "group1/M00/03/0D/ChQUAV6FSqmAB-rOAAABqsNThDQ517.csv",
-                "yTrueCol": "prediction",
-                "metrics": ["confusion_matrix"],
-                "yTrueOutHdfs": "group1/M00/00/F2/ChQKKV6FUdKASk59AAABr2uNyCY218.csv",
-                "yPredictIndex": 0,
-                "predictionCol": "label"
-            }
+        {
+            "id": 2223,
+            "type": 41,
+            "name": null,
+            "status": -1,
+            "x": -45.0417,
+            "y": -403.7084,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 1363.0,
-        "locationY": 214.4667,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 4360,
-        "processId": 145,
-        "type": 11,
-        "name": null,
-        "isLocal": "1",
-        "property": null,
-        "latestOutput": null,
-        "status": -1,
-        "locationX": 318.0,
-        "locationY": 276.4667,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 4362,
-        "processId": 145,
-        "type": 12,
-        "name": null,
-        "isLocal": "1",
-        "property": null,
-        "latestOutput": null,
-        "status": -1,
-        "locationX": 346.0,
-        "locationY": 372.4667,
-        "isEnd": 0,
-        "endIndex": []
-    }, {
-        "id": 4449,
-        "processId": 145,
-        "type": 51,
-        "name": null,
-        "isLocal": "1",
-        "property": {
-            "outTableMeta": {
-                "0": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }],
-                "1": [{
-                    "fieldName": "sepal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "label",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_length__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "sepal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "petal_width__cm_",
-                    "valueType": "float",
-                    "comment": null
-                }, {
-                    "fieldName": "prediction",
-                    "valueType": "list",
-                    "comment": null
-                }]
-            },
-            "config": {
-                "preNodeId": 2120,
-                "randomState": 1,
-                "k": 2,
-                "preNodeIndex": 0,
-                "preOutHdfs": "group1/M00/00/F1/ChQKKV6FSmCATREjAAAD0Fhc5KU988.csv"
-            }
+        {
+            "id": 2225,
+            "type": 41,
+            "name": null,
+            "status": -1,
+            "x": 541.0,
+            "y": 506.0,
         },
-        "latestOutput": null,
-        "status": 2,
-        "locationX": 1015.0,
-        "locationY": 324.0,
-        "isEnd": 1,
-        "endIndex": [{
-            "nodeIndex": 1,
-            "resultIndex": 2
-        }]
-    }],
-    "edges": [{
-        "id": 2116,
-        "processId": 145,
-        "startNodeId": 2103,
-        "endNodeId": 2105,
-        "startNodeIndex": 0,
-        "endNodeIndex": 0
-    }, {
-        "id": 2129,
-        "processId": 145,
-        "startNodeId": 2103,
-        "endNodeId": 2120,
-        "startNodeIndex": 0,
-        "endNodeIndex": 0
-    }, {
-        "id": 2131,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 2119,
-        "startNodeIndex": 1,
-        "endNodeIndex": 1
-    }, {
-        "id": 2133,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 2122,
-        "startNodeIndex": 1,
-        "endNodeIndex": 0
-    }, {
-        "id": 2135,
-        "processId": 145,
-        "startNodeId": 2119,
-        "endNodeId": 2123,
-        "startNodeIndex": 1,
-        "endNodeIndex": 0
-    }, {
-        "id": 2198,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 2215,
-        "startNodeIndex": 1,
-        "endNodeIndex": 1
-    }, {
-        "id": 2207,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 2225,
-        "startNodeIndex": 0,
-        "endNodeIndex": 0
-    }, {
-        "id": 2275,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 2274,
-        "startNodeIndex": 1,
-        "endNodeIndex": 1
-    }, {
-        "id": 2589,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 2162,
-        "startNodeIndex": 1,
-        "endNodeIndex": 1
-    }, {
-        "id": 2590,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 2216,
-        "startNodeIndex": 1,
-        "endNodeIndex": 1
-    }, {
-        "id": 2594,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 2155,
-        "startNodeIndex": 1,
-        "endNodeIndex": 1
-    }, {
-        "id": 2676,
-        "processId": 145,
-        "startNodeId": 2123,
-        "endNodeId": 2563,
-        "startNodeIndex": 0,
-        "endNodeIndex": 0
-    }, {
-        "id": 2677,
-        "processId": 145,
-        "startNodeId": 2122,
-        "endNodeId": 2563,
-        "startNodeIndex": 0,
-        "endNodeIndex": 1
-    }, {
-        "id": 4266,
-        "processId": 145,
-        "startNodeId": 2120,
-        "endNodeId": 4449,
-        "startNodeIndex": 0,
-        "endNodeIndex": 0
-    }],
+        {
+            "id": 2274,
+            "type": 43,
+            "name": null,
+            "status": 2,
+            "x": 601.0,
+            "y": 723.0,
+        },
+        {
+            "id": 2563,
+            "type": 73,
+            "name": null,
+            "status": 2,
+            "x": 1363.0,
+            "y": 214.4667,
+        },
+        {
+            "id": 4360,
+            "type": 11,
+            "name": null,
+            "status": -1,
+            "x": 318.0,
+            "y": 276.4667,
+        },
+        {
+            "id": 4362,
+            "type": 12,
+            "name": null,
+            "status": -1,
+            "x": 346.0,
+            "y": 372.4667,
+        },
+        {
+            "id": 4449,
+            "type": 51,
+            "name": null,
+            "status": 2,
+            "x": 1015.0,
+            "y": 324.0,
+        }
+    ],
+    "edges": [
+        // 结果线 endNodeId  = -1
+        {
+            "id": 2222,
+            "startNodeId": 4449,
+            "endNodeId": -1,
+            "startNodeIndex": 0,
+            "endNodeIndex": 0
+        },
+        {
+            "id": 2223,
+            "startNodeId": 4449,
+            "endNodeId": -1,
+            "startNodeIndex": 1,
+            "endNodeIndex": 2
+        },
+        {
+            "id": 2116,
+            "startNodeId": 2103,
+            "endNodeId": 2105,
+            "startNodeIndex": 0,
+            "endNodeIndex": 0
+        },
+        {
+            "id": 2129,
+            "startNodeId": 2103,
+            "endNodeId": 2120,
+            "startNodeIndex": 0,
+            "endNodeIndex": 0
+        },
+        {
+            "id": 2131,
+            "startNodeId": 2120,
+            "endNodeId": 2119,
+            "startNodeIndex": 1,
+            "endNodeIndex": 1
+        },
+        {
+            "id": 2133,
+            "startNodeId": 2120,
+            "endNodeId": 2122,
+            "startNodeIndex": 1,
+            "endNodeIndex": 0
+        },
+        {
+            "id": 2135,
+            "startNodeId": 2119,
+            "endNodeId": 2123,
+            "startNodeIndex": 1,
+            "endNodeIndex": 0
+        },
+        {
+            "id": 2198,
+            "startNodeId": 2120,
+            "endNodeId": 2215,
+            "startNodeIndex": 1,
+            "endNodeIndex": 1
+        },
+        {
+            "id": 2207,
+            "startNodeId": 2120,
+            "endNodeId": 2225,
+            "startNodeIndex": 0,
+            "endNodeIndex": 0
+        },
+        {
+            "id": 2275,
+            "startNodeId": 2120,
+            "endNodeId": 2274,
+            "startNodeIndex": 1,
+            "endNodeIndex": 1
+        },
+        {
+            "id": 2589,
+            "startNodeId": 2120,
+            "endNodeId": 2162,
+            "startNodeIndex": 1,
+            "endNodeIndex": 1
+        },
+        {
+            "id": 2590,
+            "startNodeId": 2120,
+            "endNodeId": 2216,
+            "startNodeIndex": 1,
+            "endNodeIndex": 1
+        },
+        {
+            "id": 2594,
+            "startNodeId": 2120,
+            "endNodeId": 2155,
+            "startNodeIndex": 1,
+            "endNodeIndex": 1
+        },
+        {
+            "id": 2676,
+            "startNodeId": 2123,
+            "endNodeId": 2563,
+            "startNodeIndex": 0,
+            "endNodeIndex": 0
+        },
+        {
+            "id": 2677,
+            "startNodeId": 2122,
+            "endNodeId": 2563,
+            "startNodeIndex": 0,
+            "endNodeIndex": 1
+        },
+        {
+            "id": 4266,
+            "startNodeId": 2120,
+            "endNodeId": 4449,
+            "startNodeIndex": 0,
+            "endNodeIndex": 0
+        }
+    ],
 }
 
 new TChart('#app', {
-    data: transformData(data, '#app'),
+    data,
     options: {}
 });

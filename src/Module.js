@@ -141,7 +141,6 @@ export default class Module{
                         this.addModuleInfo.endNodeIndex = i;
                         const { translateX, translateY } = group.transform();
                         this.addModuleInfo.end = [position.x + translateX + moduleInfo.d/2, position.y + translateY + moduleInfo.d/2];
-                        this.addModuleInfo.type = 'line';
                         this.addModuleInfo.endModule = module;
                         this.tempLineG.clear();
                         this.chart.css('cursor', 'grab');
@@ -161,7 +160,7 @@ export default class Module{
                 .css('cursor', 'pointer')
                 .attr(moduleInfo.circleStyle)
                 .move( position.x, position.y )
-                .mousedown(e => {
+                .mousedown(down => {
                     this.tempLineG.clear();
                     this.tempLineG
                         .path(generatePoints({
@@ -170,7 +169,7 @@ export default class Module{
                         }))
                         .stroke({
                             color: '#333',
-                            width: 0.5,
+                            width: 1,
                             linecap: 'round',
                             linejoin: 'round'
                         })
@@ -186,8 +185,7 @@ export default class Module{
                         .mousemove(null)
                         .mouseup(null)
                         .mousemove( e => {
-                            const { translateX, translateY } = group.transform();
-                            this.handleTempLine([position.x + translateX + moduleInfo.d/2, position.y + translateY + moduleInfo.d/2], e)
+                            this.handleTempLine([down.offsetX, down.offsetY ], e)
                         })
                         .mouseup( e => {
                             this.tempLineG.clear();
@@ -300,7 +298,7 @@ export default class Module{
         const addon = start[0] - (e.offsetX - this.matrix.e) > 0 ? 1 : -1;
         target && target.plot(generatePoints({
             start: start,
-            end: [e.offsetX - this.matrix.e + addon, e.offsetY - this.matrix.f].map(v => v / this.matrix.a)
+            end: [ e.offsetX + addon , e.offsetY ]
         }));
     }
 }

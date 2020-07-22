@@ -2,7 +2,8 @@ import { SVG } from '@svgdotjs/svg.js'
 import {
     generatePoints,
     getRandomID,
-    generateResultPosition
+    generateResultPosition,
+    transformData
 } from './tool';
 import '@svgdotjs/svg.filter.js';
 import Module from './Module';
@@ -11,6 +12,8 @@ import { resultInfo } from './tool';
 
 class TChart {
     constructor(target= '#app', { data,  options = {}}) {
+        this.parent = document.querySelector(target);
+        data = transformData(data, this.parent.clientWidth)
         this.chart = SVG().addTo(target).size('100%', '100%');
         this.chart.node.oncontextmenu = e => e.preventDefault();   // 阻止浏览器默认菜单
         this.container = this.chart.group().addClass( 'tetris-chart-container');
@@ -18,8 +21,7 @@ class TChart {
         this.linesG  = this.container.group().addClass('tetris-chart-lines');
         this.resultLinesG = this.container.group().addClass('tetris-chart-resultLines');
         this.resultsG = this.container.group().addClass('tetris-chart-results');
-        this.tempLineG = this.container.group();
-        this.parent = document.querySelector(target);
+        this.tempLineG = this.chart.group();
         this.data = data;
         this.lines = [];
         this.modules = [];
@@ -124,7 +126,7 @@ class TChart {
     generateLine(g, line, type = 'line') {
         const lineG = g.group();
         // 线样式 展示层
-       lineG
+        lineG
             .path(generatePoints(line))
             .stroke({
                 color: '#999',
@@ -134,7 +136,7 @@ class TChart {
             })
             .fill('none')
         // 透明事件层
-       const eventTarget = lineG
+        const eventTarget = lineG
             .path(generatePoints(line))
             .stroke({
                 color: 'transparent',
@@ -169,12 +171,14 @@ class TChart {
                         lineWidth: 2
                     })
                     .css('cursor', 'pointer')
+                    // 防止触发拖拽事件
+                    .mousedown( e => e.stopPropagation())
                     .mouseup( e => {
                         // 处理结果线逻辑
                         if(this.addModuleInfo.startNodeId) {
                             // 防止触发 chart mouseup事件 清除addModuleInfo 数据
                             e.stopPropagation();
-                            this.addModuleInfo.endNodeId = 'result';
+                            this.addModuleInfo.endNodeId = -1;
                             this.addModuleInfo.endNodeIndex = i;
                             this.addModuleInfo.end = generateResultPosition(i);
                             this.addModuleInfo.type = 'resultLine';
@@ -194,8 +198,8 @@ class TChart {
             let dx = 0,dy =0
             if(this.prev.x !== undefined) {
                 // 修正不同位置缩放造成的位置偏差
-                 dx = (x- this.prev.x) * ( (1 -  scaleX) / scaleX);
-                 dy = (y- this.prev.y) * ( (1 -  scaleY) / scaleY);
+                dx = (x- this.prev.x) * ( (1 -  scaleX) / scaleX);
+                dy = (y- this.prev.y) * ( (1 -  scaleY) / scaleY);
             }
             this.prev = {
                 x,
@@ -295,27 +299,7 @@ class TChart {
         this
             .chart
             .on('addLine', async e => {
-                if(this.addModuleInfo.type === 'line') {
-                    // 节点连线 todo：连线前钩子函数
-                    let id = getRandomID();
-                    if(this.hooks.onAddLine) {
-                        id = await this.hooks.onAddLine()
-                    }
-                    this.addModuleInfo.id = id;
-                    const {
-                        startModule,
-                        startNodeIndex,
-                        endModule,
-                        endNodeIndex,
-                    } = this.addModuleInfo;
-                    if(endModule.in[endNodeIndex].length){
-                        // 输入节点只能有一个输入源
-                        return;
-                    }
-                    endModule.in[endNodeIndex].push({ id, type: 'line'});
-                    startModule.out[startNodeIndex].push({ id, type: 'line'});
-                    this.drawLine(this.addModuleInfo);
-                }else if(this.addModuleInfo.type === 'resultLine') {
+                if(this.addModuleInfo.endNodeId === -1 ) {
                     if(this.hooks.onAddResultLine) {
                         await this.hooks.onAddResultLine()
                     }
@@ -343,6 +327,30 @@ class TChart {
                     this.drawResultLine(info);
                     // 增加结果点
                     this.updateResults()
+                }else {
+                    // 节点连线
+                    let id = getRandomID();
+                    if(this.hooks.onAddLine) {
+                        id = await this.hooks.onAddLine()
+                    }
+                    this.addModuleInfo.id = id;
+                    const {
+                        startModule,
+                        startNodeIndex,
+                        endModule,
+                        endNodeIndex,
+                    } = this.addModuleInfo;
+                    if(endModule.in[endNodeIndex].length){
+                        // 输入节点只能有一个输入源
+                        return;
+                    }
+                    endModule.in[endNodeIndex].push({ id, type: 'line'});
+                    startModule.out[startNodeIndex].push({ id, type: 'line'});
+                    const info = {};
+                    for(let key in this.addModuleInfo) {
+                        info[key] = this.addModuleInfo[key]
+                    }
+                    this.drawLine(info);
                 }
             })
     }

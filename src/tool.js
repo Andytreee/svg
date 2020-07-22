@@ -1,11 +1,3 @@
-/*
- * @Description: 2D图谱渲染工具入口
- * @version: 0.0.1
- * @Author: Andy
- * @Date: 2020/4/28 16:04
- * @LastEditors: Andy
- * @LastEditTime: 2020/4/28 16:04
- */
 // 模块宽度  高度
 import module from './module.png';
 import initial from './status/initial.png';
@@ -355,40 +347,76 @@ export function getRandomID(randomLength = 8) {
     ).toString(36);
 }
 
-export function transformData({ nodes, edges }, target) {
-    edges = edges.map(({ id, startNodeId, startNodeIndex,  endNodeId, endNodeIndex }) => {
-        const startNode = nodes.find(({id}) => id === startNodeId);
-        const endNode = nodes.find(({id}) => id === endNodeId);
-        const start = generateLinePosition('start', {
-            x: startNode.locationX,
-            y: startNode.locationY,
-            type: startNode.type,
-            index: startNodeIndex,
-        });
-        const end = generateLinePosition('end', {
-            x: endNode.locationX,
-            y: endNode.locationY,
-            type: endNode.type,
-            index: endNodeIndex,
-        });
-        return {
-            id,
-            start,
-            end,
-            startNodeId,
-            startNodeIndex,
-            endNodeId,
-            endNodeIndex,
+export function transformData({ nodes, edges }, width) {
+    // add id for nodes and edges
+    nodes = nodes.map( node => {
+        if(!node.id) {
+            node.id = getRandomID();
         }
-    });
-    const { results, resultLines } = generateResultsAndResultLines(nodes, document.querySelector(target).clientWidth);
+        return node;
+    })
+    edges = edges.map( edge => {
+        if(!edge.id) {
+            edge.id = getRandomID();
+        }
+        return edge;
+    })
 
-    nodes = nodes.map(({ id, type, name, locationX, locationY, status, }) => {
+    let results = 0;
+    const lines = [];
+    const resultLines = [];
+    edges
+        .map(({ id, startNodeId, startNodeIndex,  endNodeId, endNodeIndex }) => {
+            if(endNodeId === -1 ){
+                // filter lines linked to result point and calculate number of result points
+                if(endNodeIndex > results) {
+                    results = endNodeIndex
+                }
+                const { x, y, type } = nodes.find(({id}) => id === startNodeId);
+                resultLines.push({
+                    id: getRandomID(),
+                    start: generateLinePosition('start', { x, y, type, index: startNodeIndex}),
+                    end: generateResultPosition(endNodeIndex, width),
+                    startNodeId,
+                    startNodeIndex,
+                    endNodeId,
+                    endNodeIndex,
+                });
+            }else {
+                // filter normal lines, initial data
+                const startNode = nodes.find(({id}) => id === startNodeId);
+                const endNode = nodes.find(({id}) => id === endNodeId);
+                const start = generateLinePosition('start', {
+                    x: startNode.x,
+                    y: startNode.y,
+                    type: startNode.type,
+                    index: startNodeIndex,
+                });
+                const end = generateLinePosition('end', {
+                    x: endNode.x,
+                    y: endNode.y,
+                    type: endNode.type,
+                    index: endNodeIndex,
+                });
+                lines.push({
+                    id,
+                    start,
+                    end,
+                    startNodeId,
+                    startNodeIndex,
+                    endNodeId,
+                    endNodeIndex,
+                })
+            }
+        });
+
+    // initial data
+    nodes = nodes.map(({ id, type, name, x, y, status, }) => {
         const node = {
             id,
             name,
-            x: locationX,
-            y: locationY,
+            x,
+            y,
             inNum: modulesKV[type].inputNum,
             outNum: modulesKV[type].outputNum,
             in: generateArray([], modulesKV[type].inputNum),
@@ -396,7 +424,7 @@ export function transformData({ nodes, edges }, target) {
             status,
             type,
         };
-        edges.map( ({id: lineID, startNodeId, startNodeIndex, endNodeId, endNodeIndex}) => {
+        lines.map( ({id: lineID, startNodeId, startNodeIndex, endNodeId, endNodeIndex}) => {
             if(startNodeId === id) {
                 // 如果是线的起始点
                 if(!node.out[startNodeIndex]) node.out[startNodeIndex] = [];
@@ -416,7 +444,8 @@ export function transformData({ nodes, edges }, target) {
         });
         return node;
     });
-    return { modules: nodes, lines: edges, resultLines, results}
+
+    return { modules: nodes, lines, resultLines, results }
 }
 
 export function generateLinePosition( directionType, { x, y, type, index}) {
@@ -430,12 +459,11 @@ export function generateLinePosition( directionType, { x, y, type, index}) {
     }
 }
 
-export function generateResultsAndResultLines(nodes, width) {
+export function generateResultsAndResultLines(edges, width) {
     // 含有结果点的线
-    const rawData = nodes.filter(({endIndex}) => endIndex.length);
     const resultLines = [];
     let maxResultIndex = 0;
-    for(const {id, endIndex, locationX: x, locationY: y, type} of rawData) {
+    for(const {id, endIndex, x, y, type} of edges) {
         for(const { nodeIndex, resultIndex } of endIndex) {
             resultLines.push({
                 id: getRandomID(),
