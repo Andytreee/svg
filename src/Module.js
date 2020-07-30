@@ -6,7 +6,7 @@ import {
     moduleInfo,
     modulesKV,
     status,
-    generateResultPosition
+    generateResultPosition,
 } from "./tool";
 
 export default class Module{
@@ -20,7 +20,8 @@ export default class Module{
                     matrix,
                     addModuleInfo,
                     deleteModule,
-                    hooks
+                    hooks,
+                    data,
                 }) {
         this.lines = lines;
         this.chart = chart;
@@ -31,6 +32,7 @@ export default class Module{
         this.addModuleInfo = addModuleInfo;
         this.deleteModule = deleteModule;
         this.hooks = hooks;
+        this.data = data;
         return this.draw(module)
     }
     draw(module) {
@@ -39,7 +41,7 @@ export default class Module{
         // 初始化模块位置
         group
             .matrix({
-                a: 1, b: 0, c: 0, d: 1, e: module.x , f: module.y,
+                a: 1, b: 0, c: 0, d: 1, e: module.position[0] , f: module.position[1],
             })
             .mousedown(e => {
                 // 点击时将当前模块置于最前
@@ -70,7 +72,8 @@ export default class Module{
                     this.hooks.onModuleClick()
                 }
             })
-            .node.oncontextmenu = e => {
+            .node
+            .oncontextmenu = e => {
             this.chart.fire('menuShow', e);
             this.deleteModule.id = module.id;
         };
@@ -217,76 +220,66 @@ export default class Module{
         dragInfo.clickX = e.offsetX / this.matrix.a - translateX;
         dragInfo.clickY = e.offsetY / this.matrix.a - translateY ;
         this.chart
-            .mousemove(null)
-            .mouseup(null)
             .mousemove(e => {
                 if(dragInfo.draggable) {
-                    // const x = e.offsetX - dragInfo.clickX ;
-                    // const y = e.offsetY - dragInfo.clickY ;
                     const x = e.offsetX / this.matrix.a - dragInfo.clickX;
                     const y = e.offsetY / this.matrix.a - dragInfo.clickY;
-                    requestAnimationFrame(() =>{
-                        group.matrix({
-                            a: 1, b: 0, c: 0, d: 1, e: x , f: y,
+                    this.data.modules.some( moduleP => {
+                        if(moduleP.id === module.id) {
+                            moduleP.position = [x, y]
+                            return true;
+                        }
+                    })
+                    if(module.in.length) {
+                        module.in.map(  ins => {
+                            this.data.lines
+                                .forEach( line => {
+                                    if(ins.some(({id: inId}) => inId === line.id)) {
+                                        line.end = generateLinePosition('end', {
+                                            x,
+                                            y,
+                                            type: module.type,
+                                            index:  line.endNodeIndex,
+                                        });
+                                    }
+                                })
+                        })
+                    }
+                    if(module.out.length) {
+                        module.out.map( outs => {
+
+                            this.data.lines
+                                .forEach( line => {
+                                    if(outs.some(({id: inId}) => inId === line.id)) {
+                                        line.start = generateLinePosition('start', {
+                                            x,
+                                            y,
+                                            type: module.type,
+                                            index:  line.startNodeIndex,
+                                        });
+                                    }
+                                })
+
+                            this.data.resultLines
+                                .forEach( resultLine => {
+                                    if(outs.some(({id: inId}) => inId === resultLine.id)) {
+                                        resultLine.start = generateLinePosition('start', {
+                                            x,
+                                            y,
+                                            type: module.type,
+                                            index:  resultLine.startNodeIndex,
+                                        });
+                                    }
+                                })
                         });
-                        if(module.in.length) {
-                            module.in.map(  ins => {
-                                this.lines
-                                    .filter( ({id}) => ins.some(({id: inId}) => inId === id) )
-                                    .map( line => {
-                                        line.data.end = generateLinePosition('end', {
-                                            x,
-                                            y,
-                                            type: module.type,
-                                            index:  line.data.endNodeIndex,
-                                        });
-                                        line.target.each( (i, child) => {
-                                            child
-                                                .plot(generatePoints(line.data))
-                                        })
-                                    })
-                            })
-                        }
-                        if(module.out.length) {
-                            module.out.map( outs => {
-                                this.lines
-                                    .filter( ({id}) => outs.some(({id: inId}) => inId === id) )
-                                    .map( line => {
-                                        line.data.start = generateLinePosition('start', {
-                                            x,
-                                            y,
-                                            type: module.type,
-                                            index:  line.data.startNodeIndex,
-                                        });
-                                        line.target.each( (i, child) => {
-                                            child
-                                                .plot(generatePoints(line.data))
-                                        })
-                                    })
-                            });
-                            module.out.map( outs => {
-                                this.resultLines
-                                    .filter( ({id}) => outs.some(({id: inId}) => inId === id) )
-                                    .map( line => {
-                                        line.data.start = generateLinePosition('start', {
-                                            x,
-                                            y,
-                                            type: module.type,
-                                            index:  line.data.startNodeIndex,
-                                        });
-                                        line.data.end = generateResultPosition(line.data.endNodeIndex);
-                                        line.target.each( (i, child) => {
-                                            child
-                                                .plot(generatePoints(line.data))
-                                        })
-                                    })
-                            });
-                        }
-                    });
+                    }
                 }
             })
             .mouseup( e => {
                 dragInfo.draggable = false;
+                this.chart
+                    .mousemove(null)
+                    .mouseup(null)
             })
     }
 

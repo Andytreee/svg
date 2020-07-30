@@ -3,7 +3,8 @@ import {
     generatePoints,
     getRandomID,
     generateResultPosition,
-    transformData
+    transformData,
+    defineReactive,
 } from './tool';
 import '@svgdotjs/svg.filter.js';
 import Module from './Module';
@@ -13,7 +14,10 @@ import { resultInfo } from './tool';
 class TChart {
     constructor(target= '#app', { data,  options = {}}) {
         this.parent = document.querySelector(target);
-        data = transformData(data, this.parent.clientWidth)
+        data = transformData(data, this.parent.clientWidth);
+        console.log({
+            data
+        })
         this.chart = SVG().addTo(target).size('100%', '100%');
         this.chart.node.oncontextmenu = e => e.preventDefault();   // 阻止浏览器默认菜单
         this.container = this.chart.group().addClass( 'tetris-chart-container');
@@ -22,7 +26,7 @@ class TChart {
         this.resultLinesG = this.container.group().addClass('tetris-chart-resultLines');
         this.resultsG = this.container.group().addClass('tetris-chart-results');
         this.tempLineG = this.chart.group();
-        this.data = data;
+        this.data = {};
         this.lines = [];
         this.modules = [];
         this.results = [];
@@ -53,12 +57,50 @@ class TChart {
         this.prev = {}
     }
 
-    init({lines, modules, results = 1, resultLines}) {
+    init(data) {
+        const {
+            lines, modules, results = 1, resultLines
+        } = data;
+        this.data = {
+            lines: [],
+            resultLines: [],
+            modules: [],
+        };
         // 初始化 线、结果线、结果点、模块
         this.drawLines(lines);
         this.drawResultLines(resultLines);
         this.drawResults(results);
         this.drawModules(modules);
+        let resultsP = 1;
+        Object.defineProperty(this.data, 'results', {
+            get() {
+                return resultsP;
+            },
+            set: (newValue) => {
+                this.drawResults(newValue);
+                resultsP = newValue
+            }
+        });
+        // Object.defineProperty(data, 'resultLines', {
+        //     configurable: false,
+        //     writable: false,
+        // });
+        // end: Array(2)
+        // 0: 2103
+        // 1: 150
+        // length: 2
+        // __proto__: Array(0)
+        // endNodeId: -1
+        // endNodeIndex: 2
+        // id: "14ljlim43kio00"
+        // start: Array(2)
+        // 0: 1115
+        // 1: 381.3333333333333
+        // length: 2
+        // __proto__: Array(0)
+        // startNodeId: 4449
+        // startNodeIndex: 1
+
     }
 
     addContextMenu() {
@@ -89,38 +131,111 @@ class TChart {
 
     drawModules(modules) {
         modules.map( module => {
-            const group = new Module( module, this);
-            group.addTo(this.modulesG);
-            this.modules.push({
-                id: module.id,
-                data: module,
-                target: group,
+            // id: 4449
+            // in: [Array(1)]
+            // inNum: 1
+            // name: null
+            // out: Array(2)
+            // 0: Array(1)
+            // 0:
+            // id: "5nf8o699hsc000"
+            // type: "result"
+            // length: 1
+            // 1: Array(1)
+            // 0:
+            // id: "2q1dmxg3esa000"
+            // type: "result"
+            // __proto__: Object
+            // length: 1
+            // length: 2
+            // outNum: 2
+            // status: 2
+            // type: 51
+            // position: [1015, 324]
+            const moduleProxy = {};
+            moduleProxy.target = new Module(module, this);
+            moduleProxy.target.addTo(this.modulesG);
+            defineReactive(moduleProxy, 'position', function(newValue) {
+                const [ x, y ] = newValue;
+                moduleProxy.target.matrix({
+                    a: 1, b: 0, c: 0, d: 1, e: x , f: y,
+                });
             })
+            for(const key in module) {
+                if(module.hasOwnProperty(key)) {
+                    moduleProxy[key] = module[key]
+                }
+            }
+            this.data.modules.push(moduleProxy);
         })
     }
 
     drawLines(lines) {
-        lines.map( line => this.drawLine(line));
+        lines.map( line => {
+            const lineProxy = {};
+            lineProxy.target = this.drawLine(line);
+            defineReactive(lineProxy, 'start', function(newValue) {
+                lineProxy.end && lineProxy.target.each( (i, child) => {
+                    child
+                        .plot(generatePoints({
+                            start: newValue,
+                            end: lineProxy.end
+                        }))
+                })
+            })
+            defineReactive(lineProxy, 'end', function (newValue) {
+                lineProxy.start && lineProxy.target.each( (i, child) => {
+                    child
+                        .plot(generatePoints({
+                            start: lineProxy.start,
+                            end: newValue
+                        }))
+                })
+            })
+            for(const key in line) {
+                if(line.hasOwnProperty(key)) {
+                    lineProxy[key] = line[key]
+                }
+            }
+            this.data.lines.push(lineProxy);
+        });
     }
 
     drawLine(line) {
-        this.lines.push({
-            id: line.id,
-            data: line,
-            target: this.generateLine(this.linesG, line),
-        })
+        return this.generateLine(this.linesG, line);
     }
 
     drawResultLines(resultLines) {
-        resultLines.map( line => this.drawResultLine(line));
+        resultLines.map( resultLine => {
+            let lineProxy = {}
+            let start = resultLine.start;
+            lineProxy.target = this.drawResultLine(resultLine);
+            Object.defineProperty(lineProxy, 'start', {
+                get() {
+                    return start;
+                },
+                set: (newValue) => {
+                    newValue && lineProxy.target.each( (i, child) => {
+                        child
+                            .plot(generatePoints({
+                                start: newValue,
+                                end: resultLine.end
+                            }))
+                    })
+                    start = newValue;
+                }
+            });
+            for(let key in resultLine) {
+                if(resultLine.hasOwnProperty(key) && !['start'].includes(key)) {
+                    lineProxy[key] = resultLine[key]
+                }
+            }
+            this.data.resultLines.push(lineProxy);
+        });
     }
 
     drawResultLine(line) {
-        this.resultLines.push({
-            id: line.id,
-            data: line,
-            target: this.generateLine(this.resultLinesG, line, 'result'),
-        })
+        return this.generateLine(this.resultLinesG, line, 'result')
     }
 
     generateLine(g, line, type = 'line') {
@@ -130,9 +245,7 @@ class TChart {
             .path(generatePoints(line))
             .stroke({
                 color: '#999',
-                width: 1,
-                linecap: 'round',
-                linejoin: 'round'
+                width: 0.5,
             })
             .fill('none')
         // 透明事件层
@@ -140,9 +253,7 @@ class TChart {
             .path(generatePoints(line))
             .stroke({
                 color: 'transparent',
-                width: 4,
-                linecap: 'round',
-                linejoin: 'round'
+                width: 5,
             })
             .fill('none')
             .css('cursor', 'pointer');
@@ -156,38 +267,33 @@ class TChart {
     }
 
     drawResults(results) {
-        this.results = [];
         this.resultsG.clear();
         for(let i = 0; i<= results + 1; i++) {
-            this.results.push({
-                id: i,
-                linked: this.resultLines.some( line => line.data.endNodeIndex === i),  // 判断是否连接
-                target: this.resultsG
-                    .circle(resultInfo.d)
-                    .move(this.parent.clientWidth - resultInfo.d - resultInfo.marginRight, (i + 1) * resultInfo.marginTop -  resultInfo.d /2)
-                    .attr({
-                        stroke: '#589DF9',
-                        fill: '#ffffff',
-                        lineWidth: 2
-                    })
-                    .css('cursor', 'pointer')
-                    // 防止触发拖拽事件
-                    .mousedown( e => e.stopPropagation())
-                    .mouseup( e => {
-                        // 处理结果线逻辑
-                        if(this.addModuleInfo.startNodeId) {
-                            // 防止触发 chart mouseup事件 清除addModuleInfo 数据
-                            e.stopPropagation();
-                            this.addModuleInfo.endNodeId = -1;
-                            this.addModuleInfo.endNodeIndex = i;
-                            this.addModuleInfo.end = generateResultPosition(i);
-                            this.addModuleInfo.type = 'resultLine';
-                            this.tempLineG.clear();
-                            this.chart.css('cursor', 'grab');
-                            this.chart.fire('addLine')
-                        }
-                    })
-            })
+            this.resultsG
+                .circle(resultInfo.d)
+                .move(this.parent.clientWidth - resultInfo.d - resultInfo.marginRight, (i + 1) * resultInfo.marginTop -  resultInfo.d /2)
+                .attr({
+                    stroke: '#589DF9',
+                    fill: '#FFF',
+                    lineWidth: 2
+                })
+                .css('cursor', 'pointer')
+                // 防止触发拖拽事件
+                .mousedown( e => e.stopPropagation())
+                .mouseup( e => {
+                    // 处理结果线逻辑
+                    if(this.addModuleInfo.startNodeId) {
+                        // 防止触发 chart mouseup事件 清除addModuleInfo 数据
+                        e.stopPropagation();
+                        this.addModuleInfo.endNodeId = -1;
+                        this.addModuleInfo.endNodeIndex = i;
+                        this.addModuleInfo.end = generateResultPosition(i);
+                        this.addModuleInfo.type = 'resultLine';
+                        this.tempLineG.clear();
+                        this.chart.css('cursor', 'grab');
+                        this.chart.fire('addLine')
+                    }
+                })
         }
     }
     // 画布缩放
@@ -310,7 +416,7 @@ class TChart {
                         startNodeIndex,
                         endNodeIndex,
                     } = this.addModuleInfo;
-                    if(this.results[endNodeIndex].linked) {
+                    if(this.data.resultLines.some( resultLine => resultLine.endNodeIndex === endNodeIndex)) {
                         // 如果该结果点已经连接则不允许再连接
                         return;
                     }
@@ -360,7 +466,7 @@ class TChart {
         this.resultLines.map(({data: {endNodeIndex}}) => {
             if(endNodeIndex > maxResultIndex) maxResultIndex = endNodeIndex;
         });
-        this.drawResults(maxResultIndex)
+        this.data.results = maxResultIndex;
     }
 
     onLineContextMenu() {

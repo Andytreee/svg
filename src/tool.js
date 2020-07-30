@@ -415,8 +415,7 @@ export function transformData({ nodes, edges }, width) {
         const node = {
             id,
             name,
-            x,
-            y,
+            position: [x, y],
             inNum: modulesKV[type].inputNum,
             outNum: modulesKV[type].outputNum,
             in: generateArray([], modulesKV[type].inputNum),
@@ -502,4 +501,23 @@ export function generatePoints({start, end}) {
 
 export function generateArray(item, length ) {
     return Array.from({length}).map(() => JSON.parse(JSON.stringify(item)));
+}
+
+export function defineReactive(obj, key, setFunc) {
+    let value = null;
+    Object.defineProperty(obj, key, {
+        enumerable:true,
+        configurable:true,
+        get() {
+            return value;
+        },
+        set(newValue) {
+            if(value !== null && setFunc ){
+                requestAnimationFrame(() => {
+                    setFunc(newValue)
+                })
+            }
+            value = newValue
+        }
+    });
 }
