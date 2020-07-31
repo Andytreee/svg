@@ -4,8 +4,13 @@ import {
     getRandomID,
     generateResultPosition,
     transformData,
-    defineReactive,
 } from './tool';
+import {
+    defineReactive,
+    proxyLine,
+    proxyResultLine,
+    redefineArr
+} from './proxy';
 import '@svgdotjs/svg.filter.js';
 import Module from './Module';
 import './index.css'
@@ -66,11 +71,73 @@ class TChart {
             resultLines: [],
             modules: [],
         };
+        // 定义响应式
+        redefineArr(this.data.lines, this.drawLine.bind(this), function reactive(line) {
+            const lineProxy = {};
+            defineReactive(lineProxy, 'start', function(newValue) {
+                lineProxy.end && lineProxy.target.each( (i, child) => {
+                    child
+                        .plot(generatePoints({
+                            start: newValue,
+                            end: lineProxy.end
+                        }))
+                })
+            })
+            defineReactive(lineProxy, 'end', function (newValue) {
+                lineProxy.start && lineProxy.target.each( (i, child) => {
+                    child
+                        .plot(generatePoints({
+                            start: lineProxy.start,
+                            end: newValue
+                        }))
+                })
+            })
+            for(const key in line) {
+                if(line.hasOwnProperty(key)) {
+                    lineProxy[key] = line[key]
+                }
+            }
+            return lineProxy;
+        });
+        redefineArr(this.data.resultLines, this.drawResultLine.bind(this), function reactive(resultLine) {
+            let lineProxy = {}
+            defineReactive(lineProxy, 'start', function (newValue) {
+                lineProxy.target && lineProxy.target.each( (i, child) => {
+                    child
+                        .plot(generatePoints({
+                            start: newValue,
+                            end: resultLine.end
+                        }))
+                })
+            })
+            for(let key in resultLine) {
+                if(resultLine.hasOwnProperty(key) && !['start'].includes(key)) {
+                    lineProxy[key] = resultLine[key]
+                }
+            }
+            return lineProxy;
+        });
+        redefineArr(this.data.modules, this.drawModule.bind(this), function reactive(module) {
+            const moduleProxy = {};
+            defineReactive(moduleProxy, 'position', function(newValue) {
+                const [ x, y ] = newValue;
+                moduleProxy.target.matrix({
+                    a: 1, b: 0, c: 0, d: 1, e: x , f: y,
+                });
+            })
+            for(const key in module) {
+                if(module.hasOwnProperty(key)) {
+                    moduleProxy[key] = module[key]
+                }
+            }
+            return moduleProxy;
+        })
         // 初始化 线、结果线、结果点、模块
-        this.drawLines(lines);
-        this.drawResultLines(resultLines);
+        this.data.lines.push(...lines);
+        this.data.modules.push(...modules);
+        this.data.resultLines.push(...resultLines);
         this.drawResults(results);
-        this.drawModules(modules);
+
         let resultsP = 1;
         Object.defineProperty(this.data, 'results', {
             get() {
@@ -81,26 +148,15 @@ class TChart {
                 resultsP = newValue
             }
         });
-        // Object.defineProperty(data, 'resultLines', {
-        //     configurable: false,
-        //     writable: false,
-        // });
-        // end: Array(2)
-        // 0: 2103
-        // 1: 150
-        // length: 2
-        // __proto__: Array(0)
-        // endNodeId: -1
-        // endNodeIndex: 2
-        // id: "14ljlim43kio00"
-        // start: Array(2)
-        // 0: 1115
-        // 1: 381.3333333333333
-        // length: 2
-        // __proto__: Array(0)
-        // startNodeId: 4449
-        // startNodeIndex: 1
-
+        Object.defineProperty(data, 'lines', {
+            writable: false,
+        });
+        Object.defineProperty(data, 'resultLines', {
+            writable: false,
+        });
+        Object.defineProperty(data, 'modules', {
+            writable: false,
+        });
     }
 
     addContextMenu() {
@@ -129,109 +185,14 @@ class TChart {
         </filter>`
     }
 
-    drawModules(modules) {
-        modules.map( module => {
-            // id: 4449
-            // in: [Array(1)]
-            // inNum: 1
-            // name: null
-            // out: Array(2)
-            // 0: Array(1)
-            // 0:
-            // id: "5nf8o699hsc000"
-            // type: "result"
-            // length: 1
-            // 1: Array(1)
-            // 0:
-            // id: "2q1dmxg3esa000"
-            // type: "result"
-            // __proto__: Object
-            // length: 1
-            // length: 2
-            // outNum: 2
-            // status: 2
-            // type: 51
-            // position: [1015, 324]
-            const moduleProxy = {};
-            moduleProxy.target = new Module(module, this);
-            moduleProxy.target.addTo(this.modulesG);
-            defineReactive(moduleProxy, 'position', function(newValue) {
-                const [ x, y ] = newValue;
-                moduleProxy.target.matrix({
-                    a: 1, b: 0, c: 0, d: 1, e: x , f: y,
-                });
-            })
-            for(const key in module) {
-                if(module.hasOwnProperty(key)) {
-                    moduleProxy[key] = module[key]
-                }
-            }
-            this.data.modules.push(moduleProxy);
-        })
-    }
-
-    drawLines(lines) {
-        lines.map( line => {
-            const lineProxy = {};
-            lineProxy.target = this.drawLine(line);
-            defineReactive(lineProxy, 'start', function(newValue) {
-                lineProxy.end && lineProxy.target.each( (i, child) => {
-                    child
-                        .plot(generatePoints({
-                            start: newValue,
-                            end: lineProxy.end
-                        }))
-                })
-            })
-            defineReactive(lineProxy, 'end', function (newValue) {
-                lineProxy.start && lineProxy.target.each( (i, child) => {
-                    child
-                        .plot(generatePoints({
-                            start: lineProxy.start,
-                            end: newValue
-                        }))
-                })
-            })
-            for(const key in line) {
-                if(line.hasOwnProperty(key)) {
-                    lineProxy[key] = line[key]
-                }
-            }
-            this.data.lines.push(lineProxy);
-        });
+    drawModule(module) {
+        const target = new Module(module, this);
+        target.addTo(this.modulesG)
+        return target;
     }
 
     drawLine(line) {
         return this.generateLine(this.linesG, line);
-    }
-
-    drawResultLines(resultLines) {
-        resultLines.map( resultLine => {
-            let lineProxy = {}
-            let start = resultLine.start;
-            lineProxy.target = this.drawResultLine(resultLine);
-            Object.defineProperty(lineProxy, 'start', {
-                get() {
-                    return start;
-                },
-                set: (newValue) => {
-                    newValue && lineProxy.target.each( (i, child) => {
-                        child
-                            .plot(generatePoints({
-                                start: newValue,
-                                end: resultLine.end
-                            }))
-                    })
-                    start = newValue;
-                }
-            });
-            for(let key in resultLine) {
-                if(resultLine.hasOwnProperty(key) && !['start'].includes(key)) {
-                    lineProxy[key] = resultLine[key]
-                }
-            }
-            this.data.resultLines.push(lineProxy);
-        });
     }
 
     drawResultLine(line) {
@@ -430,9 +391,17 @@ class TChart {
                     for(let key in this.addModuleInfo) {
                         info[key] = this.addModuleInfo[key]
                     }
-                    this.drawResultLine(info);
+                    this.data.resultLines.push({
+                        end: this.addModuleInfo.end,
+                        endNodeId: this.addModuleInfo.endNodeId,
+                        endNodeIndex: this.addModuleInfo.endNodeIndex,
+                        id,
+                        start: this.addModuleInfo.start,
+                        startNodeId: this.addModuleInfo.startNodeId,
+                        startNodeIndex: this.addModuleInfo.startNodeIndex,
+                    })
                     // 增加结果点
-                    this.updateResults()
+                    // this.updateResults()
                 }else {
                     // 节点连线
                     let id = getRandomID();
@@ -463,7 +432,7 @@ class TChart {
 
     updateResults() {
         let maxResultIndex = 0;
-        this.resultLines.map(({data: {endNodeIndex}}) => {
+        this.data.resultLines.map(({data: {endNodeIndex}}) => {
             if(endNodeIndex > maxResultIndex) maxResultIndex = endNodeIndex;
         });
         this.data.results = maxResultIndex;

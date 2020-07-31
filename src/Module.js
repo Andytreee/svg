@@ -176,8 +176,7 @@ export default class Module{
                             linecap: 'round',
                             linejoin: 'round'
                         })
-                        .fill('none')
-                    ;
+                        .fill('none');
                     this.addModuleInfo.startNodeId = module.id;
                     this.addModuleInfo.startNodeIndex = i;
                     const { translateX, translateY } = group.transform();
@@ -185,8 +184,6 @@ export default class Module{
                     this.addModuleInfo.startModule = module;
                     this.chart
                         .css('cursor', 'default')
-                        .mousemove(null)
-                        .mouseup(null)
                         .mousemove( e => {
                             this.handleTempLine([down.offsetX, down.offsetY ], e)
                         })
@@ -194,6 +191,9 @@ export default class Module{
                             this.tempLineG.clear();
                             this.chart.css('cursor', 'grab');
                             this.addModuleInfo.startNodeId = null;
+                            this.chart
+                                .mousemove(null)
+                                .mouseup(null)
                         })
                 })
         }
@@ -247,7 +247,6 @@ export default class Module{
                     }
                     if(module.out.length) {
                         module.out.map( outs => {
-
                             this.data.lines
                                 .forEach( line => {
                                     if(outs.some(({id: inId}) => inId === line.id)) {
@@ -259,7 +258,6 @@ export default class Module{
                                         });
                                     }
                                 })
-
                             this.data.resultLines
                                 .forEach( resultLine => {
                                     if(outs.some(({id: inId}) => inId === resultLine.id)) {

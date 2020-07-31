@@ -502,22 +502,3 @@ export function generatePoints({start, end}) {
 export function generateArray(item, length ) {
     return Array.from({length}).map(() => JSON.parse(JSON.stringify(item)));
 }
-
-export function defineReactive(obj, key, setFunc) {
-    let value = null;
-    Object.defineProperty(obj, key, {
-        enumerable:true,
-        configurable:true,
-        get() {
-            return value;
-        },
-        set(newValue) {
-            if(value !== null && setFunc ){
-                requestAnimationFrame(() => {
-                    setFunc(newValue)
-                })
-            }
-            value = newValue
-        }
-    });
-}
