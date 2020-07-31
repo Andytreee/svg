@@ -387,10 +387,6 @@ class TChart {
                     }
                     startModule.out[startNodeIndex].push({ id, type: 'result'});
                     // 复制新增节点信息
-                    const info = {};
-                    for(let key in this.addModuleInfo) {
-                        info[key] = this.addModuleInfo[key]
-                    }
                     this.data.resultLines.push({
                         end: this.addModuleInfo.end,
                         endNodeId: this.addModuleInfo.endNodeId,
@@ -421,18 +417,22 @@ class TChart {
                     }
                     endModule.in[endNodeIndex].push({ id, type: 'line'});
                     startModule.out[startNodeIndex].push({ id, type: 'line'});
-                    const info = {};
-                    for(let key in this.addModuleInfo) {
-                        info[key] = this.addModuleInfo[key]
-                    }
-                    this.drawLine(info);
+                    this.data.lines.push({
+                        end: this.addModuleInfo.end,
+                        endNodeId: this.addModuleInfo.endNodeId,
+                        endNodeIndex: this.addModuleInfo.endNodeIndex,
+                        id,
+                        start: this.addModuleInfo.start,
+                        startNodeId: this.addModuleInfo.startNodeId,
+                        startNodeIndex: this.addModuleInfo.startNodeIndex,
+                    })
                 }
             })
     }
 
     updateResults() {
         let maxResultIndex = 0;
-        this.data.resultLines.map(({data: {endNodeIndex}}) => {
+        this.data.resultLines.map(({endNodeIndex}) => {
             if(endNodeIndex > maxResultIndex) maxResultIndex = endNodeIndex;
         });
         this.data.results = maxResultIndex;
@@ -452,21 +452,19 @@ class TChart {
                     if(this.hooks.onDeleteResultLine) {
                         await this.hooks.onDeleteResultLine()
                     }
-                    this.deleteResultLine(this.deleteLineInfo.id)
+                    this.deleteResultLine(this.deleteLineInfo.id);
+                    this.updateResults();
                 }
-                this.updateResults();
             })
     }
 
     deleteLine(id) {
         try{
             // 删除dom节点
-            const line = this.findLineInLines(id);
-            if(line) line.target.node.remove();
             const index = this.findLineIndexInLines(id);
             if(index > -1) {
                 // 删除存储的数据
-                this.lines.splice(index, 1);
+                this.data.lines.splice(index, 1);
             }
         }catch (e) {
             console.error(e)
@@ -476,12 +474,10 @@ class TChart {
     deleteResultLine(id) {
         try{
             // 删除dom节点
-            const resultLine = this.findLineInResultLines(id);
-            if(resultLine) resultLine.target.node.remove();
             const index = this.findLineIndexInResultLines(id);
             if(index > -1) {
                 // 删除存储的数据
-                this.resultLines.splice(index, 1);
+                this.data.resultLines.splice(index, 1);
             }
         }catch (e) {
             console.error(e)
@@ -513,47 +509,45 @@ class TChart {
         this.chart.fire('menuHide');
         const module = this.findModuleInModules(this.deleteModule.id);
         //  删除连线
-        module.data.in.map( arr => arr.map(({id}) => this.deleteLine(id)));
-        module.data.out.map( arr => arr.map(({id, type}) => {
+        module.in.map( arr => arr.map(({id}) => this.deleteLine(id)));
+        module.out.map( arr => arr.map(({id, type}) => {
             if(type === 'line') {
                 this.deleteLine(id);
             }else{
                 this.deleteResultLine(id);
             }
         }));
-        // 删除节点
-        module.target.node.remove();
         const index = this.findModuleIndexInModules(this.deleteModule.id);
         if(index > -1) {
             // 删除存储的数据
-            this.modules.splice(index, 1);
+            this.data.modules.splice(index, 1);
         }
         // 重绘结果点
         this.updateResults()
     }
 
     findModuleInModules(targetId) {
-        return this.modules.find(({id}) => id === targetId)
+        return this.data.modules.find(({id}) => id === targetId)
     }
 
     findModuleIndexInModules(targetId) {
-        return this.modules.findIndex(({id}) => id === targetId)
+        return this.data.modules.findIndex(({id}) => id === targetId)
     }
 
     findLineInLines(targetId) {
-        return this.lines.find(({id}) => id === targetId);
+        return this.data.lines.find(({id}) => id === targetId);
     }
 
     findLineIndexInLines(targetId) {
-        return this.lines.findIndex(({id}) => id === targetId);
+        return this.data.lines.findIndex(({id}) => id === targetId);
     }
 
     findLineInResultLines(targetId) {
-        return this.resultLines.find(({id}) => id === targetId);
+        return this.data.resultLines.find(({id}) => id === targetId);
     }
 
     findLineIndexInResultLines(targetId) {
-        return this.resultLines.findIndex(({id}) => id === targetId);
+        return this.data.resultLines.findIndex(({id}) => id === targetId);
     }
 }
 
