@@ -32,10 +32,6 @@ class TChart {
         this.resultsG = this.container.group().addClass('tetris-chart-results');
         this.tempLineG = this.chart.group();
         this.data = {};
-        this.lines = [];
-        this.modules = [];
-        this.results = [];
-        this.resultLines = [];
         // 要删除的连线
         this.deleteLineInfo = {};
         // 要删除的模块id

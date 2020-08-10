@@ -14,7 +14,6 @@ export default class Module{
                 {
                     chart,
                     container,
-                    lines,
                     resultLines,
                     tempLineG,
                     matrix,
@@ -23,7 +22,6 @@ export default class Module{
                     hooks,
                     data,
                 }) {
-        this.lines = lines;
         this.chart = chart;
         this.resultLines = resultLines;
         this.tempLineG = tempLineG;
