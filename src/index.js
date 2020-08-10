@@ -11,7 +11,7 @@ import {
     proxyResultLine,
     redefineArr
 } from './proxy';
-import '@svgdotjs/svg.filter.js';
+// import '@svgdotjs/svg.filter.js';
 import Module from './Module';
 import './index.css'
 import { resultInfo } from './tool';
@@ -75,13 +75,13 @@ class TChart {
         redefineArr(this.data.lines, this.drawLine.bind(this), function reactive(line) {
             const lineProxy = {};
             defineReactive(lineProxy, 'start', function(newValue) {
-                lineProxy.end && lineProxy.target.each( (i, child) => {
-                    child
-                        .plot(generatePoints({
-                            start: newValue,
-                            end: lineProxy.end
-                        }))
-                })
+                    lineProxy.end && lineProxy.target.each( (i, child) => {
+                        child
+                            .plot(generatePoints({
+                                start: newValue,
+                                end: lineProxy.end
+                            }))
+                    })
             })
             defineReactive(lineProxy, 'end', function (newValue) {
                 lineProxy.start && lineProxy.target.each( (i, child) => {
